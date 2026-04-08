@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>조코딩 AX 파트너스 - 사전 기업 진단 리포트</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+:root{--brand:#7C3AED;--brand2:#9333EA;--brand-light:#EDE9FE;--brand-dark:#4C1D95;--accent:#F59E0B;--bg:#f8f7f4;--card:#fff;--text:#1a1a1a;--sub:#6b7280;--border:#e5e5e5;--gap-high:#EF4444;--gap-mid:#F59E0B;--gap-low:#22C55E;--r:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+.page{width:100%;max-width:800px;margin:0 auto 24px;background:var(--card);border-radius:var(--r);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08);position:relative;page-break-after:always}
+.page-inner{padding:44px 48px}
+.page-num{position:absolute;bottom:20px;right:32px;font-size:11px;color:#aaa;font-weight:500}
+.cover{background:#fff;color:var(--brand-dark);padding:72px 56px 56px;min-height:1131px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+.cover-logo{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:700;letter-spacing:-0.5px;justify-content:center}
+.cover-logo svg{width:40px;height:40px}
+.cover h1{font-size:32px;font-weight:900;line-height:1.3;margin-top:40px;letter-spacing:-1px;color:var(--brand)}
+.cover .sub{font-size:15px;opacity:.7;margin-top:8px;color:var(--brand-dark)}
+.cover-meta{display:flex;flex-direction:column;align-items:center;gap:8px;font-size:13px;opacity:.85;margin-top:40px;border-top:1px solid var(--border);padding-top:20px;color:var(--sub)}
+.cover-meta span{display:flex;align-items:center;gap:6px;justify-content:center}
+.badge-conf{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);background:var(--brand-light);color:var(--brand);font-size:10px;padding:4px 12px;border-radius:20px;letter-spacing:1px;font-weight:500}
+h2{font-size:20px;font-weight:700;margin-bottom:6px;color:var(--brand-dark);letter-spacing:-0.5px}
+h3{font-size:15px;font-weight:700;margin:20px 0 10px;color:var(--text)}
+.page-desc{font-size:13px;color:var(--sub);margin-bottom:24px;line-height:1.6}
+.summary-box{background:var(--brand-light);border-radius:var(--r);padding:20px 24px;margin-bottom:24px;border-left:4px solid var(--brand)}
+.summary-box p{font-size:14px;line-height:1.7;color:var(--brand-dark)}
+.summary-box .tmpl{color:var(--brand);font-weight:600}
+.metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:24px}
+.metric{background:#f9fafb;border-radius:var(--r);padding:14px 12px;text-align:center;border:1px solid var(--border)}
+.metric .label{font-size:10px;color:var(--sub);margin-bottom:6px;font-weight:500;letter-spacing:.5px;text-transform:uppercase}
+.metric .score{font-size:22px;font-weight:900;color:var(--brand)}
+.metric .target{font-size:11px;color:var(--sub);margin-top:2px}
+.metric .gap-bar{height:4px;border-radius:2px;background:#eee;margin-top:6px;overflow:hidden}
+.metric .gap-fill{height:100%;border-radius:2px}
+table{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:16px}
+th{background:#f3f0ff;color:var(--brand-dark);font-weight:600;text-align:left;padding:10px 12px;border-bottom:2px solid var(--brand);font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+td{padding:10px 12px;border-bottom:1px solid #f0f0f0;vertical-align:top;line-height:1.5}
+tr:hover td{background:#fafafa}
+.info-grid{display:grid;grid-template-columns:140px 1fr;gap:0;margin-bottom:20px;border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.info-grid dt{background:#f9fafb;padding:10px 14px;font-size:12px;font-weight:600;color:var(--sub);border-bottom:1px solid var(--border)}
+.info-grid dd{padding:10px 14px;font-size:13px;border-bottom:1px solid var(--border)}
+.stage-check{display:flex;flex-direction:column;gap:6px;margin:16px 0}
+.stage{display:flex;align-items:center;gap:10px;padding:8px 14px;border-radius:8px;font-size:13px;border:1px solid var(--border);transition:all .2s}
+.stage.active{background:var(--brand-light);border-color:var(--brand);color:var(--brand-dark);font-weight:600}
+.stage .dot{width:18px;height:18px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.stage.active .dot{background:var(--brand);border-color:var(--brand)}
+.stage.active .dot::after{content:'';width:6px;height:6px;background:#fff;border-radius:50%}
+.chart-wrap{position:relative;margin:20px auto;display:flex;justify-content:center}
+.radar-legend{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:12px;font-size:11px;color:var(--sub)}
+.radar-legend span{display:flex;align-items:center;gap:4px}
+.radar-legend .sq{width:10px;height:10px;border-radius:2px}
+.matrix-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0}
+.matrix-cell{border-radius:var(--r);padding:16px;border:1px solid var(--border);position:relative}
+.matrix-cell h4{font-size:13px;font-weight:700;margin-bottom:6px}
+.matrix-cell p{font-size:11.5px;color:var(--sub);line-height:1.5}
+.matrix-cell .num{position:absolute;top:12px;right:14px;font-size:18px;font-weight:900;opacity:.15}
+.m1{background:#fef3c7;border-color:#fcd34d}.m2{background:#dcfce7;border-color:#86efac}
+.m3{background:#fee2e2;border-color:#fca5a5}.m4{background:#e0e7ff;border-color:#a5b4fc}
+.gap-row{display:grid;grid-template-columns:120px 1fr 1fr 60px 1fr;gap:8px;align-items:start;padding:12px 0;border-bottom:1px solid #f0f0f0;font-size:12px}
+.gap-row:first-child{font-weight:600;font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid var(--brand)}
+.timeline{position:relative;margin:28px 0}
+.timeline::before{content:'';position:absolute;top:18px;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--brand),var(--accent),#22C55E);border-radius:2px}
+.tl-phase{padding-top:32px;display:flex;flex-direction:column}
+.tl-dot{width:12px;height:12px;border-radius:50%;position:absolute;top:13px;border:3px solid var(--card)}
+.tl-phase:nth-child(1) .tl-dot{background:var(--brand);left:0}
+.tl-phase:nth-child(2) .tl-dot{background:var(--accent);left:50%;transform:translateX(-50%)}
+.tl-phase:nth-child(3) .tl-dot{background:#22C55E;right:0}
+.tl-phases{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;position:relative;align-items:stretch}
+.tl-card{background:#f9fafb;border-radius:var(--r);padding:14px;border:1px solid var(--border);font-size:12px;height:100%;display:flex;flex-direction:column}
+.tl-card h4{font-size:13px;font-weight:700;margin-bottom:4px}
+.tl-card .tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;margin:4px 4px 0 0}
+.track-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0}
+.track{border-radius:var(--r);padding:20px;border:1px solid var(--border)}
+.track h4{font-size:14px;font-weight:700;margin-bottom:4px}
+.track .dur{font-size:11px;color:var(--sub);margin-bottom:12px}
+.track-item{display:flex;gap:8px;padding:6px 0;border-bottom:1px solid #f5f5f5;font-size:12px;align-items:flex-start}
+.track-item:last-child{border:none}
+.track-num{width:22px;height:22px;border-radius:50%;background:var(--brand-light);color:var(--brand);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.kpi-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:20px 0}
+.kpi-col{border-radius:var(--r);padding:20px;text-align:center}
+.kpi-col h4{font-size:14px;font-weight:700;margin-bottom:12px}
+.kpi-item{text-align:left;padding:8px 0;border-bottom:1px solid rgba(0,0,0,.06);font-size:12px}
+.kpi-item:last-child{border:none}
+.pkg{border:1px solid var(--border);border-radius:var(--r);padding:16px 20px;margin-bottom:12px;position:relative}
+.pkg h4{font-size:14px;font-weight:700;margin-bottom:2px}
+.pkg .grade{font-size:11px;color:var(--sub);margin-bottom:10px}
+.pkg-steps{display:flex;gap:8px;flex-wrap:wrap}
+.pkg-step{background:#f3f0ff;color:var(--brand-dark);padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600}
+.action-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:8px;border:1px solid var(--border);margin-bottom:8px;font-size:13px}
+.action-num{width:28px;height:28px;border-radius:50%;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.ending{background:#fff;color:var(--brand-dark);padding:56px;text-align:center;min-height:1131px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ending h2{color:var(--brand);font-size:24px;margin-bottom:8px}
+.ending p{opacity:.8;font-size:14px;margin-bottom:24px;color:var(--sub)}
+.ending .contact{display:flex;gap:24px;font-size:13px;color:var(--sub)}
+.findings{margin:16px 0}
+.finding{padding:12px 16px;border-left:3px solid var(--brand);background:#faf9ff;border-radius:0 8px 8px 0;margin-bottom:8px;font-size:12.5px;line-height:1.6}
+.tool-list{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.tool-tag{padding:4px 10px;border-radius:6px;font-size:11px;font-weight:500;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}
+.env-card{border-radius:var(--r);padding:16px 18px;border:1px solid var(--border);margin-bottom:10px}
+.env-card h4{font-size:13px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.env-card ul{list-style:none;font-size:12.5px;line-height:2}
+.env-card li::before{content:'•';color:var(--brand);font-weight:900;margin-right:6px}
+.env-2col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.swot-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border-radius:var(--r);overflow:hidden;border:1px solid var(--border);margin:16px 0}
+.swot-cell{padding:18px 20px;min-height:160px}
+.swot-cell h4{font-size:14px;font-weight:900;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.swot-cell ul{list-style:none;font-size:12px;line-height:2}
+.swot-cell li::before{font-weight:900;margin-right:6px}
+.swot-s{background:#f0fdf4;border-right:1px solid var(--border);border-bottom:1px solid var(--border)}
+.swot-s h4{color:#166534}.swot-s li::before{content:'✦';color:#22C55E}
+.swot-w{background:#fef2f2;border-bottom:1px solid var(--border)}
+.swot-w h4{color:#991b1b}.swot-w li::before{content:'▲';color:#EF4444}
+.swot-o{background:#eff6ff;border-right:1px solid var(--border)}
+.swot-o h4{color:#1e40af}.swot-o li::before{content:'→';color:#3B82F6}
+.swot-t{background:#fefce8}
+.swot-t h4{color:#854d0e}.swot-t li::before{content:'⚠';color:#F59E0B}
+.cross-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.cross-card{border-radius:8px;padding:14px 16px;border:1px solid var(--border)}
+.cross-card h5{font-size:12px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:4px}
+.cross-card p{font-size:11.5px;color:var(--sub);line-height:1.6}
+.scope-card{display:grid;grid-template-columns:100px 1fr;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:10px}
+.scope-label{background:#f3f0ff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--brand-dark);padding:14px;text-align:center;border-right:1px solid var(--border)}
+.scope-content{padding:14px 18px;font-size:13px;line-height:1.7}
+.org-chart{display:flex;flex-direction:column;align-items:center;gap:0;margin:20px 0}
+.org-top{background:var(--brand);color:#fff;padding:10px 24px;border-radius:8px;font-size:13px;font-weight:700;text-align:center}
+.org-line{width:2px;height:16px;background:var(--border)}
+.org-box{background:#f9fafb;border:1px solid var(--border);border-radius:8px;padding:10px 16px;text-align:center;font-size:12px;min-width:110px}
+.org-box strong{display:block;font-size:13px;margin-bottom:2px}
+.task-priority{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700}
+.tp-high{background:#fee2e2;color:#991b1b}.tp-mid{background:#fef3c7;color:#92400e}.tp-low{background:#dcfce7;color:#166534}
+.gantt{width:100%;margin:16px 0;border-collapse:collapse;font-size:11px}
+.gantt th{background:#f9fafb;font-size:10px;padding:6px 4px;text-align:center;border:1px solid #eee;font-weight:600;color:var(--sub)}
+.gantt td{padding:4px;border:1px solid #f0f0f0;height:28px;position:relative}
+.gantt .task-name{font-size:11px;font-weight:600;padding:4px 8px;white-space:nowrap;min-width:140px;background:#fafafa}
+.gbar{height:20px;border-radius:4px;position:absolute;top:4px}
+.gb1{background:var(--brand);opacity:.8}
+.gb2{background:var(--accent);opacity:.8}
+.gb3{background:#22C55E;opacity:.8}
+.gb4{background:#3B82F6;opacity:.8}
+.gb5{background:#EC4899;opacity:.8}
+.expert-box{border-radius:var(--r);padding:16px 20px;margin:18px 0;position:relative;font-size:12.5px;line-height:1.8}
+.expert-box .eb-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.expert-box .eb-head .eb-icon{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;color:#fff}
+.expert-box .eb-body{color:var(--text);line-height:1.8}
+.expert-box .eb-body em{font-style:normal;font-weight:600;color:var(--brand-dark)}
+.expert-box .eb-author{margin-top:10px;padding-top:8px;border-top:1px solid rgba(0,0,0,.06);font-size:11px;color:var(--sub);display:flex;align-items:center;gap:6px}
+.expert-box .eb-author strong{color:var(--text);font-weight:600}
+.eb-insight{background:linear-gradient(135deg,#f5f3ff 0%,#ede9fe 100%);border:1px solid #ddd6fe}
+.eb-insight .eb-head{color:var(--brand-dark)}.eb-insight .eb-head .eb-icon{background:var(--brand)}
+.eb-source{background:#f9fafb;border:1px solid var(--border);border-left:3px solid #9ca3af}
+.eb-source .eb-head{color:#6b7280}.eb-source .eb-head .eb-icon{background:#6b7280}
+.eb-source .eb-body{font-size:11.5px;color:var(--sub)}
+.eb-source .eb-body a{color:var(--brand);text-decoration:none}
+.eb-bench{background:linear-gradient(135deg,#eff6ff 0%,#dbeafe 100%);border:1px solid #bfdbfe}
+.eb-bench .eb-head{color:#1e40af}.eb-bench .eb-head .eb-icon{background:#3B82F6}
+.eb-bench .stat-row{display:flex;gap:12px;margin:10px 0 4px;flex-wrap:wrap}
+.eb-bench .stat-item{background:rgba(255,255,255,.7);border-radius:8px;padding:8px 14px;text-align:center;flex:1;min-width:100px}
+.eb-bench .stat-val{font-size:18px;font-weight:900;color:#1e40af}
+.eb-bench .stat-label{font-size:10px;color:#6b7280;margin-top:2px}
+.eb-strategy{background:linear-gradient(135deg,#fffbeb 0%,#fef3c7 100%);border:1px solid #fcd34d}
+.eb-strategy .eb-head{color:#92400e}.eb-strategy .eb-head .eb-icon{background:#F59E0B}
+.eb-risk{background:#fef2f2;border:1px solid #fecaca;border-left:3px solid #EF4444}
+.eb-risk .eb-head{color:#991b1b}.eb-risk .eb-head .eb-icon{background:#EF4444}
+@media print{
+  @page{margin:0;size:A4}
+  body{background:#fff}
+  .page{box-shadow:none;border-radius:0;margin:0;page-break-after:always}
+  .cover,.ending{min-height:100vh;height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center}
+}
+</style>
+</head>
+<body>
+
+<!-- ==================== PAGE 1: COVER ==================== -->
+<div class="page">
+  <div class="cover">
+    <div class="cover-logo">
+      <img src="/logo.png" alt="조코딩 AX 파트너스" style="width:120px;height:120px;object-fit:contain">
+    </div>
+    <h1 style="font-size:36px;margin-top:20px">사전 기업 진단 리포트</h1>
+    <div class="sub">AX Pre-Assessment Diagnostic Report</div>
+    <div style="font-size:20px;font-weight:700;margin-top:48px">{기업명}</div>
+    <div class="cover-meta">
+      <span>진단일: {YYYY.MM.DD}</span><span>담당: {컨설턴트명}</span>
+      <span>contact@jocodingax.ai</span>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== PAGE 2: EXECUTIVE SUMMARY ==================== -->
+<div class="page">
+  <div class="page-inner">
+    <h2>Executive summary</h2>
+    <p class="page-desc">핵심 진단 결과를 한눈에 파악할 수 있는 경영진 요약입니다.</p>
+    <div class="summary-box">
+      <p><span class="tmpl">{기업명}</span>은(는) 현재 AI 도입 <span class="tmpl">{N}단계</span>로, <span class="tmpl">{핵심 문제 키워드}</span> 해결이 AX 전환의 최우선 과제입니다.</p>
+    </div>
+    <div class="metrics">
+      <div class="metric"><div class="label">AI 전략</div><div class="score">2.3</div><div class="target">목표 4.0</div><div class="gap-bar"><div class="gap-fill" style="width:46%;background:var(--gap-high)"></div></div></div>
+      <div class="metric"><div class="label">데이터</div><div class="score">1.7</div><div class="target">목표 3.5</div><div class="gap-bar"><div class="gap-fill" style="width:34%;background:var(--gap-high)"></div></div></div>
+      <div class="metric"><div class="label">프로세스</div><div class="score">2.7</div><div class="target">목표 4.0</div><div class="gap-bar"><div class="gap-fill" style="width:54%;background:var(--gap-mid)"></div></div></div>
+      <div class="metric"><div class="label">인재역량</div><div class="score">2.0</div><div class="target">목표 4.0</div><div class="gap-bar"><div class="gap-fill" style="width:40%;background:var(--gap-high)"></div></div></div>
+      <div class="metric"><div class="label">기술환경</div><div class="score">3.3</div><div class="target">목표 4.0</div><div class="gap-bar"><div class="gap-fill" style="width:66%;background:var(--gap-low)"></div></div></div>
+    </div>
+    <div style="background:var(--brand-light);border-radius:var(--r);padding:16px 20px;text-align:center;margin-top:12px">
+      <div style="font-size:12px;color:var(--sub);margin-bottom:4px">종합 성숙도 점수</div>
+      <span style="font-size:36px;font-weight:900;color:var(--brand)">12.0</span><span style="font-size:16px;color:var(--sub);margin-left:4px">/ 25</span>
+      <div style="margin-top:6px"><span style="background:var(--brand);color:#fff;padding:4px 16px;border-radius:20px;font-size:13px;font-weight:700">B등급 — AI 실험 기업</span></div>
+    </div>
+    <h3>Top 3 우선 과제</h3>
+    <table>
+      <tr><th style="width:32px">#</th><th>과제</th><th style="width:100px">대응 모듈</th><th style="width:80px">긴급도</th></tr>
+      <tr><td style="font-weight:700;color:var(--brand)">1</td><td>전사 AI 워크숍을 통한 인식 전환 및 공감대 형성</td><td><span style="background:#f3f0ff;color:var(--brand-dark);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600">[A] 워크숍</span></td><td><span style="color:var(--gap-high);font-weight:700">● 높음</span></td></tr>
+      <tr><td style="font-weight:700;color:var(--brand)">2</td><td>부서별 데이터 통합 관리 체계 설계 및 API 연동 기반 마련</td><td><span style="background:#f3f0ff;color:var(--brand-dark);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600">[B] 컨설팅</span></td><td><span style="color:var(--gap-high);font-weight:700">● 높음</span></td></tr>
+      <tr><td style="font-weight:700;color:var(--brand)">3</td><td>핵심 업무 3건에 대한 AI 자동화 PoC 실행</td><td><span style="background:#f3f0ff;color:var(--brand-dark);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600">[D] 해커톤</span></td><td><span style="color:var(--gap-mid);font-weight:700">● 중간</span></td></tr>
+    </table>
+    <div style="background:#f9fafb;border-radius:var(--r);padding:14px 18px;border:1px solid var(--border);display:flex;align-items:center;gap:16px">
+      <div style="font-size:12px;color:var(--sub)">권장 경로</div>
+      <div style="display:flex;gap:6px;align-items:center;font-size:12px;font-weight:600">
+        <span style="background:var(--brand);color:#fff;padding:3px 10px;border-radius:4px">[A] 워크숍</span><span style="color:#aaa">→</span>
+        <span style="background:var(--brand);color:#fff;padding:3px 10px;border-radius:4px">[B] 컨설팅</span><span style="color:#aaa">→</span>
+        <span style="background:var(--brand);color:#fff;padding:3px 10px;border-radius:4px">[C] 교육</span><span style="color:#aaa">→</span>
+        <span style="background:var(--brand);color:#fff;padding:3px 10px;border-radius:4px">[D] 해커톤</span>
+      </div>
+      <div style="margin-left:auto;font-size:12px;color:var(--sub)">예상 4~5개월</div>
+    </div>
+    <div class="expert-box eb-insight">
+      <div class="eb-head"><span class="eb-icon">💡</span> 컨설턴트 인사이트</div>
+      <div class="eb-body">{기업명}의 현재 AI 성숙도(B등급, 12.0/25점)는 국내 중소기업 평균(C등급, 8.3점) 대비 양호하나, <em>데이터 인프라(1.7점)와 인재 역량(2.0점)의 극단적 불균형</em>이 핵심 병목입니다. 기술 환경(3.3점)이 상대적으로 높아 AI 도구 도입 기반은 마련되어 있으므로, <em>"인재 먼저, 데이터 병행"</em> 전략이 최적의 투자 효율을 보입니다.</div>
+    </div>
+  </div>
+  <div class="page-num">2 / 8</div>
+</div>
+
+<!-- ==================== PAGE 3: COMPANY OVERVIEW ==================== -->
+<div class="page">
+  <div class="page-inner">
+    <h2>기업 개요 & AI 현황 스냅샷</h2>
+    <p class="page-desc">진단 대상 기업의 기본 정보와 현재 AI 활용 수준을 정리합니다.</p>
+    <h3>기업 기본 정보</h3>
+    <dl class="info-grid">
+      <dt>기업명</dt><dd>{정식 법인명}</dd>
+      <dt>업종 / 산업군</dt><dd>{예: 제조업 / IT서비스 / 유통}</dd>
+      <dt>임직원 수</dt><dd>{N}명 (정규직 {N} / 비정규직 {N})</dd>
+      <dt>연매출 규모</dt><dd>{10억 미만 / 10~50억 / 50~100억 / 100억 이상}</dd>
+      <dt>주요 사업 내용</dt><dd>{핵심 사업 서술}</dd>
+      <dt>주요 고객층</dt><dd>{B2B / B2C / B2G}</dd>
+    </dl>
+    <h3>현재 AI 도입 단계 판정</h3>
+    <div class="stage-check">
+      <div class="stage"><div class="dot"></div>1단계: 미도입 — AI 도구를 사용하지 않음</div>
+      <div class="stage active"><div class="dot"></div>2단계: 개인 실험 — 일부 직원이 ChatGPT 등을 개별 활용</div>
+      <div class="stage"><div class="dot"></div>3단계: 부서 도입 — 특정 부서에서 AI 도구를 업무에 적용 중</div>
+      <div class="stage"><div class="dot"></div>4단계: 전사 확산 — 여러 부서 업무 프로세스에 AI 통합</div>
+      <div class="stage"><div class="dot"></div>5단계: AX 내재화 — AI 중심 업무 프로세스 재설계 완료</div>
+    </div>
+    <h3>AX 성숙도 진단</h3>
+    <p class="page-desc">5개 핵심 영역을 5점 척도로 정량 진단하여 레이더 차트로 시각화합니다.</p>
+    <div class="chart-wrap"><canvas id="radarChart" width="420" height="340"></canvas></div>
+    <div class="radar-legend">
+      <span><span class="sq" style="background:rgba(124,58,237,.3)"></span>현재 수준</span>
+    </div>
+  </div>
+  <div class="page-num">3 / 8</div>
+</div>
+
+<!-- ==================== PAGE 5: PAIN POINTS ==================== -->
+<div class="page">
+  <div class="page-inner">
+    <h2>업무 프로세스별 pain point 분석</h2>
+    <p class="page-desc">부서·업무 단위로 현재 겪고 있는 문제를 구조화하고 AI 적용 가능성을 맵핑합니다.</p>
+    <table>
+      <tr><th>부서</th><th>핵심 업무</th><th>Pain point</th><th style="text-align:center">주당</th><th style="text-align:center">AI 적용</th><th style="text-align:center">순위</th></tr>
+      <tr><td style="font-weight:600">마케팅</td><td>콘텐츠 제작</td><td>수작업 소재 제작 3일+</td><td style="text-align:center">15h</td><td style="text-align:center">★★★★☆</td><td style="text-align:center"><span style="color:var(--gap-high);font-weight:700">높음</span></td></tr>
+      <tr><td style="font-weight:600">재무</td><td>월말 보고서</td><td>데이터 취합 과도한 시간</td><td style="text-align:center">20h</td><td style="text-align:center">★★★★★</td><td style="text-align:center"><span style="color:var(--gap-high);font-weight:700">높음</span></td></tr>
+      <tr><td style="font-weight:600">영업</td><td>고객 응대</td><td>반복 질문 수작업 응대</td><td style="text-align:center">10h</td><td style="text-align:center">★★★☆☆</td><td style="text-align:center"><span style="color:var(--gap-mid);font-weight:700">중간</span></td></tr>
+      <tr><td style="font-weight:600">인사</td><td>채용 스크리닝</td><td>지원서 대량 수작업 검토</td><td style="text-align:center">8h</td><td style="text-align:center">★★★★☆</td><td style="text-align:center"><span style="color:var(--gap-mid);font-weight:700">중간</span></td></tr>
+    </table>
+    <h3>AI 적용 우선순위</h3>
+    <div class="findings">
+      <div class="finding"><strong>발견 1:</strong> ChatGPT 활용이 마케팅팀 2~3명에 편중, 나머지 부서는 사실상 미활용</div>
+      <div class="finding"><strong>발견 2:</strong> 영업·재무 데이터가 엑셀/그룹웨어에 분산, 취합에 매달 2일+ 소요</div>
+      <div class="finding"><strong>발견 3:</strong> 경영진 AI 도입 긍정적이나, ROI 높은 업무 판단 기준 부재</div>
+    </div>
+    <h3>내부 역량 진단 (Internal)</h3>
+    <p class="page-desc">내부 역량을 종합적으로 분석하여 AX전환 전략의 기초를 마련합니다.</p>
+    <table>
+      <tr><th>진단 영역</th><th>현황 요약</th><th style="text-align:center">수준</th><th>핵심 이슈</th></tr>
+      <tr><td style="font-weight:600">경영진 리더십</td><td>AI 전환 의지 있으나 구체적 전략·예산 미확보</td><td style="text-align:center"><span style="color:var(--gap-mid);font-weight:700">●</span></td><td>전략 부재, 의사결정 체계 미수립</td></tr>
+      <tr><td style="font-weight:600">조직 문화</td><td>변화 수용도 중간, 소극적 관망 분위기</td><td style="text-align:center"><span style="color:var(--gap-mid);font-weight:700">●</span></td><td>실패 허용 문화 부족, 실험 인센티브 없음</td></tr>
+      <tr><td style="font-weight:600">인적 역량</td><td>AI 활용 경험 직원 {N}명 ({X}%), 전문 인력 0명</td><td style="text-align:center"><span style="color:var(--gap-high);font-weight:700">●</span></td><td>교육 체계 부재, 자발적 학습자 소수</td></tr>
+      <tr><td style="font-weight:600">데이터 자산</td><td>부서별 엑셀·그룹웨어에 분산, 품질 미검증</td><td style="text-align:center"><span style="color:var(--gap-high);font-weight:700">●</span></td><td>통합 DB 없음, API 연동 전무</td></tr>
+      <tr><td style="font-weight:600">IT 인프라</td><td>클라우드 부분 도입, 협업 도구 {Slack/Teams} 사용 중</td><td style="text-align:center"><span style="color:var(--gap-low);font-weight:700">●</span></td><td>레거시 시스템 일부 잔존</td></tr>
+      <tr><td style="font-weight:600">업무 프로세스</td><td>핵심 업무 SOP 미문서화, 수작업 의존 비율 높음</td><td style="text-align:center"><span style="color:var(--gap-mid);font-weight:700">●</span></td><td>자동화 기반 없이 AI 적용 한계</td></tr>
+      <tr><td style="font-weight:600">재무 여력</td><td>AI 관련 별도 예산 미편성, 단기 투자 가능 범위 제한적</td><td style="text-align:center"><span style="color:var(--gap-mid);font-weight:700">●</span></td><td>ROI 불확실 → 투자 결정 지연</td></tr>
+    </table>
+    <div style="font-size:11px;color:var(--sub);margin-top:4px">● 수준 범례: <span style="color:var(--gap-low)">● 양호</span> · <span style="color:var(--gap-mid)">● 보통</span> · <span style="color:var(--gap-high)">● 미흡</span></div>
+  </div>
+  <div class="page-num">4 / 8</div>
+</div>
+
+<!-- ==================== PAGE 7: SWOT 분석 ==================== -->
+<div class="page">
+  <div class="page-inner">
+    <h2>AX 전환을 위한 SWOT 분석</h2>
+    <p class="page-desc">외부 환경과 내부 역량 진단 결과를 SWOT 프레임워크로 종합하고, 교차 전략을 도출합니다.</p>
+    <div class="swot-grid">
+      <div class="swot-cell swot-s">
+        <h4>S · 강점 (Strengths)</h4>
+        <ul>
+          <li>경영진의 AX 전환 의지 및 관심 보유</li>
+          <li>클라우드 및 협업 도구 기본 인프라 구축 완료</li>
+          <li>소규모 조직 특성상 의사결정 속도 빠름</li>
+          <li>{업종 특화 강점: 예) 풍부한 고객 데이터 보유}</li>
+          <li>젊은 인력 비율 높아 디지털 친숙도 양호</li>
+        </ul>
+      </div>
+      <div class="swot-cell swot-w">
+        <h4>W · 약점 (Weaknesses)</h4>
+        <ul>
+          <li>AI 전문 인력 0명, 체계적 교육 이력 전무</li>
+          <li>데이터가 부서별로 분산, 통합 관리 체계 없음</li>
+          <li>AI 전략·로드맵 미수립, 우선순위 판단 불가</li>
+          <li>업무 프로세스 SOP 미문서화 → AI 적용 기반 부족</li>
+          <li>AI 전용 예산 미편성, 투자 규모 제한적</li>
+        </ul>
+      </div>
+      <div class="swot-cell swot-o">
+        <h4>O · 기회 (Opportunities)</h4>
+        <ul>
+          <li>생성형 AI 도구의 비용 하락 및 접근성 대폭 향상</li>
+          <li>바이브코딩·노코드로 비개발자도 AI 활용 가능</li>
+          <li>정부 AI 바우처·AX 촉진 보조금 활용 가능</li>
+          <li>경쟁사 대비 선제적 AI 도입 시 차별화 기회</li>
+          <li>AI 기반 업무 자동화로 인건비 상승 대응 가능</li>
+        </ul>
+      </div>
+      <div class="swot-cell swot-t">
+        <h4>T · 위협 (Threats)</h4>
+        <ul>
+          <li>경쟁사의 AI 도입 가속 → 격차 확대 위험</li>
+          <li>AI 미도입 기업 2~3년 내 경쟁력 도태 예상</li>
+          <li>데이터 보안·AI 윤리 규제 강화 추세</li>
+          <li>AI 인재 확보 경쟁 심화 (대기업 vs 중소기업)</li>
+          <li>기술 변화 속도 대비 조직 적응 속도 불일치 위험</li>
+        </ul>
+      </div>
+    </div>
+    <h3>SWOT 교차 전략 (AX 전환 방향성 도출)</h3>
+    <div class="cross-grid">
+      <div class="cross-card" style="background:#f0fdf4;border-color:#86efac">
+        <h5><span style="background:#22C55E;color:#fff;padding:1px 6px;border-radius:3px;font-size:10px">SO</span> 강점 × 기회 → 공격 전략</h5>
+        <p>빠른 의사결정 구조를 활용하여 <strong>생성형 AI 도구를 즉시 도입</strong>하고, 클라우드 인프라 위에 <strong>Quick Win 과제를 선제 실행</strong>하여 경쟁사 대비 AX 선점</p>
+      </div>
+      <div class="cross-card" style="background:#fef2f2;border-color:#fca5a5">
+        <h5><span style="background:#EF4444;color:#fff;padding:1px 6px;border-radius:3px;font-size:10px">WO</span> 약점 × 기회 → 개선 전략</h5>
+        <p>바이브코딩·노코드 도구 활용으로 <strong>전문 인력 부재를 보완</strong>하고, 정부 보조금을 활용하여 <strong>외부 AX 파트너십(교육·컨설팅) 예산 확보</strong></p>
+      </div>
+      <div class="cross-card" style="background:#eff6ff;border-color:#93c5fd">
+        <h5><span style="background:#3B82F6;color:#fff;padding:1px 6px;border-radius:3px;font-size:10px">ST</span> 강점 × 위협 → 방어 전략</h5>
+        <p>경영진 의지를 기반으로 <strong>AI 거버넌스·보안 정책을 선제 수립</strong>하고, 내부 데이터 관리 체계를 구축하여 <strong>규제 리스크 사전 대응</strong></p>
+      </div>
+      <div class="cross-card" style="background:#fefce8;border-color:#fcd34d">
+        <h5><span style="background:#F59E0B;color:#fff;padding:1px 6px;border-radius:3px;font-size:10px">WT</span> 약점 × 위협 → 생존 전략</h5>
+        <p>데이터 분산·인재 부족 상태에서 경쟁 도태를 방지하기 위해, <strong>AX 파트너 기반 10개월 장기 내재화 프로그램</strong>으로 조직 체질 자체를 전환</p>
+      </div>
+    </div>
+    <div class="summary-box" style="margin-top:16px">
+      <p><strong>전략 핵심:</strong> <span class="tmpl">{기업명}</span>은(는) SO(공격) 전략으로 Quick Win을 빠르게 달성하면서, WO(개선) 전략으로 근본적 역량 부족을 병행 해결하는 <strong>"속도 + 체질 개선" 이중 트랙</strong>이 최적입니다.</p>
+    </div>
+  </div>
+  <div class="page-num">5 / 8</div>
+</div>
+
+<!-- ==================== PAGE 8: GAP ANALYSIS ==================== -->
+<div class="page">
+  <div class="page-inner">
+    <h2>현재 수준 vs 목표 수준 gap 분석</h2>
+    <p class="page-desc">5대 영역별 As-Is / To-Be / Gap을 명확히 하고 전환에 필요한 핵심 액션을 도출합니다.</p>
+    <div class="chart-wrap" style="margin:12px 0"><canvas id="gapChart" width="700" height="240"></canvas></div>
+    <div style="margin-top:20px">
+      <div class="gap-row"><span>영역</span><span>현재 (As-Is)</span><span>목표 (To-Be)</span><span>Gap</span><span>핵심 전환 액션</span></div>
+      <div class="gap-row"><span style="font-weight:600">AI 전략</span><span style="font-size:11.5px;color:var(--sub)">전략 부재, 대표 의지에 의존</span><span style="font-size:11.5px">문서화된 AX 로드맵, 분기별 리뷰</span><span><span style="background:#fee2e2;color:#991b1b;padding:2px 6px;border-radius:3px;font-size:10px;font-weight:700">높음</span></span><span style="font-size:11.5px">[B] 사전 분석 컨설팅</span></div>
+      <div class="gap-row"><span style="font-weight:600">데이터</span><span style="font-size:11.5px;color:var(--sub)">부서별 엑셀, 통합 DB 없음</span><span style="font-size:11.5px">통합 관리 체계, API 연동</span><span><span style="background:#fee2e2;color:#991b1b;padding:2px 6px;border-radius:3px;font-size:10px;font-weight:700">매우높음</span></span><span style="font-size:11.5px">데이터 정비 + Open API화</span></div>
+      <div class="gap-row"><span style="font-weight:600">프로세스</span><span style="font-size:11.5px;color:var(--sub)">AI 적용 0~5%, 수작업</span><span style="font-size:11.5px">핵심 3건 AI 자동화, 30%+ 절감</span><span><span style="background:#fef3c7;color:#92400e;padding:2px 6px;border-radius:3px;font-size:10px;font-weight:700">중간</span></span><span style="font-size:11.5px">Quick Win 우선 실행</span></div>
+      <div class="gap-row"><span style="font-weight:600">인재역량</span><span style="font-size:11.5px;color:var(--sub)">교육 전무, 일부만 활용</span><span style="font-size:11.5px">전원 교육 완료, 챔피언 1+명</span><span><span style="background:#fee2e2;color:#991b1b;padding:2px 6px;border-radius:3px;font-size:10px;font-weight:700">높음</span></span><span style="font-size:11.5px">[A] 워크숍 → [C] 교육</span></div>
+      <div class="gap-row"><span style="font-weight:600">기술환경</span><span style="font-size:11.5px;color:var(--sub)">클라우드 일부, 협업 도구 O</span><span style="font-size:11.5px">AI 도구 3종+ 표준화</span><span><span style="background:#dcfce7;color:#166534;padding:2px 6px;border-radius:3px;font-size:10px;font-weight:700">낮음</span></span><span style="font-size:11.5px">SaaS 전환 + 도구 표준화</span></div>
+    </div>
+    <div class="summary-box" style="margin-top:16px">
+      <p>가장 시급한 영역은 <strong>데이터 인프라</strong>이며, <strong>인재 & 조직 역량</strong>을 병행 개선하여 3개월 내 기초 체질을 전환하는 것이 핵심입니다.</p>
+    </div>
+  </div>
+  <div class="page-num">6 / 8</div>
+</div>
+
+
+<!-- ==================== PAGE 10: AX 혁신 과제 발굴 ==================== -->
+<div class="page">
+  <div class="page-inner">
+    <h2>AX 혁신 과제 발굴</h2>
+    <p class="page-desc">SWOT 교차 전략과 Pain Point 분석 결과를 종합하여 AX 전환 핵심 과제를 발굴합니다.</p>
+    <h3>과제 발굴 프로세스</h3>
+    <div style="display:flex;gap:8px;margin:12px 0;font-size:12px;font-weight:600;text-align:center">
+      <div style="flex:1;background:var(--brand-light);padding:10px;border-radius:8px;color:var(--brand-dark)">Pain Point<br><span style="font-weight:400;font-size:11px">부서별 문제 수집</span></div>
+      <div style="display:flex;align-items:center;color:#aaa">→</div>
+      <div style="flex:1;background:#fef3c7;padding:10px;border-radius:8px;color:#92400e">AI 적용성 평가<br><span style="font-weight:400;font-size:11px">난이도 × 효과</span></div>
+      <div style="display:flex;align-items:center;color:#aaa">→</div>
+      <div style="flex:1;background:#dcfce7;padding:10px;border-radius:8px;color:#166534">과제 확정<br><span style="font-weight:400;font-size:11px">우선순위 부여</span></div>
+      <div style="display:flex;align-items:center;color:#aaa">→</div>
+      <div style="flex:1;background:#eff6ff;padding:10px;border-radius:8px;color:#1e40af">PoC 계획<br><span style="font-weight:400;font-size:11px">스프린트 설계</span></div>
+    </div>
+    <h3>AX 혁신 과제 리스트</h3>
+    <table>
+      <tr><th style="width:28px">#</th><th>과제명</th><th>부서</th><th>유형</th><th style="text-align:center">난이도</th><th style="text-align:center">효과</th><th style="text-align:center">우선순위</th></tr>
+      <tr><td style="font-weight:900;color:var(--brand)">1</td><td style="font-weight:600">월말 재무 보고서 자동 생성</td><td>재무</td><td><span class="task-priority tp-mid">자동화</span></td><td style="text-align:center">중</td><td style="text-align:center;font-weight:700;color:var(--gap-low)">★★★★★</td><td style="text-align:center"><span class="task-priority tp-high">P1</span></td></tr>
+      <tr><td style="font-weight:900;color:var(--brand)">2</td><td style="font-weight:600">마케팅 콘텐츠 AI 초안 생성 파이프라인</td><td>마케팅</td><td><span class="task-priority tp-mid">생성AI</span></td><td style="text-align:center">하</td><td style="text-align:center;font-weight:700;color:var(--gap-low)">★★★★☆</td><td style="text-align:center"><span class="task-priority tp-high">P1</span></td></tr>
+      <tr><td style="font-weight:900;color:var(--brand)">3</td><td style="font-weight:600">고객 FAQ 자동 응답 챗봇 구축</td><td>영업</td><td><span class="task-priority tp-mid">챗봇</span></td><td style="text-align:center">중</td><td style="text-align:center;font-weight:700;color:var(--gap-mid)">★★★★☆</td><td style="text-align:center"><span class="task-priority tp-high">P1</span></td></tr>
+      <tr><td style="font-weight:900;color:var(--brand)">4</td><td style="font-weight:600">채용 서류 AI 스크리닝 시스템</td><td>인사</td><td><span class="task-priority tp-mid">분류AI</span></td><td style="text-align:center">중</td><td style="text-align:center;font-weight:700;color:var(--gap-mid)">★★★☆☆</td><td style="text-align:center"><span class="task-priority tp-mid">P2</span></td></tr>
+      <tr><td style="font-weight:900;color:var(--brand)">5</td><td style="font-weight:600">회의록 자동 요약 & 액션아이템 추출</td><td>전사</td><td><span class="task-priority tp-mid">생성AI</span></td><td style="text-align:center">하</td><td style="text-align:center;font-weight:700;color:var(--gap-mid)">★★★☆☆</td><td style="text-align:center"><span class="task-priority tp-mid">P2</span></td></tr>
+      <tr><td style="font-weight:900;color:var(--brand)">6</td><td style="font-weight:600">영업 데이터 통합 대시보드 구축</td><td>영업</td><td><span class="task-priority tp-mid">데이터</span></td><td style="text-align:center">상</td><td style="text-align:center;font-weight:700;color:var(--gap-low)">★★★★★</td><td style="text-align:center"><span class="task-priority tp-mid">P2</span></td></tr>
+      <tr><td style="font-weight:900;color:var(--brand)">7</td><td style="font-weight:600">내부 데이터 Open API 플랫폼 구축</td><td>개발</td><td><span class="task-priority tp-mid">인프라</span></td><td style="text-align:center">상</td><td style="text-align:center;font-weight:700;color:var(--gap-low)">★★★★★</td><td style="text-align:center"><span class="task-priority tp-low">P3</span></td></tr>
+      <tr><td style="font-weight:900;color:var(--brand)">8</td><td style="font-weight:600">AI 기반 매출 예측 모델 구축</td><td>경영지원</td><td><span class="task-priority tp-mid">예측AI</span></td><td style="text-align:center">상</td><td style="text-align:center;font-weight:700;color:var(--gap-low)">★★★★☆</td><td style="text-align:center"><span class="task-priority tp-low">P3</span></td></tr>
+    </table>
+    <div style="font-size:10px;color:var(--sub);margin-top:4px">우선순위: <span class="task-priority tp-high">P1 즉시 실행</span> <span class="task-priority tp-mid">P2 단기 추진</span> <span class="task-priority tp-low">P3 중장기</span></div>
+    <h3>과제별 기대 효과 요약</h3>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px">
+      <div class="metric"><div class="label">총 과제 수</div><div class="score" style="font-size:20px">8건</div><div class="target">P1: 3 / P2: 3 / P3: 2</div></div>
+      <div class="metric"><div class="label">예상 시간절감</div><div class="score" style="font-size:20px">53h</div><div class="target">주당 (전체 합산)</div></div>
+      <div class="metric"><div class="label">예상 ROI</div><div class="score" style="font-size:20px">{X}%</div><div class="target">6개월 누적</div></div>
+      <div class="metric"><div class="label">커버 부서</div><div class="score" style="font-size:20px">5개</div><div class="target">전 부서 포함</div></div>
+    </div>
+  </div>
+  <div class="page-num">7 / 8</div>
+</div>
+
+
+
+<!-- ==================== PAGE 13: EDUCATION ==================== -->
+<div class="page">
+  <div class="page-inner">
+    <h2 style="text-align:center">AX 교육 커리큘럼</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="track" style="border-top:3px solid var(--brand)">
+        <div class="track-item"><div class="track-num">1</div><div>AI 도구 활용 기초<br><span style="color:var(--sub);font-size:11px">ChatGPT, Claude, Gemini 실습</span></div></div>
+        <div class="track-item"><div class="track-num">2</div><div>프롬프트 엔지니어링 & 업무 설계<br><span style="color:var(--sub);font-size:11px">업무별 프롬프트 작성, 자동화 시나리오</span></div></div>
+        <div class="track-item"><div class="track-num">3</div><div>바이브코딩 & 노코드 자동화<br><span style="color:var(--sub);font-size:11px">Cursor/Copilot, Make/Zapier 활용</span></div></div>
+        <div class="track-item"><div class="track-num">4</div><div>내부 데이터 연동 & API 활용<br><span style="color:var(--sub);font-size:11px">REST API, 데이터 파이프라인 기초</span></div></div>
+      </div>
+      <div class="track" style="border-top:3px solid var(--accent)">
+        <div class="track-item"><div class="track-num">5</div><div>AI 에이전트 구축<br><span style="color:var(--sub);font-size:11px">LLM 에이전트, 챗봇 설계</span></div></div>
+        <div class="track-item"><div class="track-num">6</div><div>보고·운영 자동화 실습<br><span style="color:var(--sub);font-size:11px">리포트 자동화, 데이터 대시보드</span></div></div>
+        <div class="track-item"><div class="track-num">7</div><div>서비스화 & 프로토타입 완성<br><span style="color:var(--sub);font-size:11px">PoC → 실 서비스 배포</span></div></div>
+        <div class="track-item"><div class="track-num">8</div><div>AX 리더십 & 확산 전략<br><span style="color:var(--sub);font-size:11px">부서 확산 계획, 의사결정 보조</span></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="page-num">8 / 8</div>
+</div>
+
+
+
+<!-- ==================== ENDING ==================== -->
+<div class="page">
+  <div class="ending">
+    <img src="/logo.png" alt="조코딩 AX 파트너스" style="width:80px;height:80px;object-fit:contain;margin-bottom:16px">
+    <h2 style="font-size:28px">일하는 방식을 AI로 다시 설계합니다</h2>
+    <p>단기 교육 납품이 아닌, 같이 실행하는 AX 파트너십</p>
+    <div class="contact"><span>contact@jocodingax.ai</span><span>서울 서초구 사평대로 55길 65-7</span></div>
+  </div>
+</div>
+
+<!-- ==================== CHARTS ==================== -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+var rc=document.getElementById('radarChart');
+if(rc){new Chart(rc,{type:'radar',data:{labels:['AI 전략 & 리더십','데이터 인프라','업무 프로세스\nAI 적용도','인재 & 조직 역량','기술 환경 & 도구'],datasets:[{label:'현재',data:[2.3,1.7,2.7,2.0,3.3],backgroundColor:'rgba(124,58,237,.15)',borderColor:'#7C3AED',pointBackgroundColor:'#7C3AED',borderWidth:2,pointRadius:4}]},options:{responsive:false,scales:{r:{min:0,max:5,ticks:{stepSize:1,font:{size:10},backdropColor:'transparent'},pointLabels:{font:{size:11,family:'Noto Sans KR'}},grid:{color:'rgba(0,0,0,.06)'}}},plugins:{legend:{display:false}}}})}
+var gc=document.getElementById('gapChart');
+if(gc){new Chart(gc,{type:'bar',data:{labels:['AI 전략','데이터 인프라','업무 프로세스','인재 & 조직','기술 환경'],datasets:[{label:'현재',data:[2.3,1.7,2.7,2.0,3.3],backgroundColor:'#7C3AED',borderRadius:4,barPercentage:.4},{label:'목표',data:[4.0,3.5,4.0,4.0,4.0],backgroundColor:'#F59E0B',borderRadius:4,barPercentage:.4}]},options:{responsive:false,scales:{y:{min:0,max:5,ticks:{stepSize:1}},x:{grid:{display:false}}},plugins:{legend:{position:'bottom',labels:{font:{size:11,family:'Noto Sans KR'}}}}}})}
+</script>
+</body>
+</html>
