@@ -34,6 +34,25 @@ export interface ReportFields {
   milestones: Array<{ label: string; items: string }> | null;
 }
 
+// ── 파생 계산 메트릭: 설문 복수 답변 조합으로 산출 ──
+export interface DerivedMetrics {
+  // ROI 계산 엔진
+  reportWritingMonthlyHours: number | null;  // I4(보고서 소요시간) × J8(월간 보고서 건수)
+  repetitiveMonthlyHours: number | null;     // I3(주당 반복업무 시간) × 4.3
+  dataProcessingMonthlyHours: number | null; // J9(데이터 취합 월간 시간) 중간값
+  // 복합 지수
+  changeReadiness: 'low' | 'medium' | 'high' | null;  // B9(경영진 의지) + B10(조직 수용도) 평균
+  securityRisk: 'low' | 'medium' | 'high' | null;     // J4 + J5 + J6 평균
+  communicationLoad: 'low' | 'medium' | 'high' | 'very_high' | null; // I2 + J7 종합
+  competitiveThreat: 'low' | 'medium' | 'high' | null; // J1 기반
+  // 분류값
+  budgetTier: 'standard' | 'professional' | 'enterprise' | null; // F2 → 패키지 매칭
+  pilotScale: 'pilot' | 'team' | 'department' | 'enterprise' | null; // F3 → 교육규모
+  decisionAuthority: 'high' | 'medium' | 'low' | null; // A3 → 의사결정 권한
+  shadowAIRisk: 'none' | 'low' | 'medium' | 'high' | null; // H8 → Shadow IT 위험도
+  onboardingAutomationNeed: 'low' | 'medium' | 'high' | null; // J13 → 온보딩 자동화 필요성
+}
+
 export interface ExtractMetadata {
   fieldsExtracted: number;
   fieldsMissing: number;

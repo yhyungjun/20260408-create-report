@@ -3,7 +3,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useReport } from '@/context/ReportContext';
-import { parseSurveyAnswers, prefillFieldsFromSurvey, formatSurveyForLLM } from '@/lib/survey-mapping';
+import { parseSurveyAnswers, remapFormIds, prefillFieldsFromSurvey, computeDerivedMetrics, formatSurveyForLLM } from '@/lib/survey-mapping';
 import { isSupportedUrl } from '@/lib/google-sheets';
 
 // ── CSV 파싱 (Google Sheets 호환: BOM, 따옴표 중첩, \r\n/\r/\n 모두 처리) ──
@@ -235,12 +235,15 @@ export default function ReportInputPage() {
       if (surveyInfo) {
         const row = surveyInfo.rows[selectedCompanyIdx];
         if (row) {
-          // 설문 응답 파싱 → 구조화
-          const answers = parseSurveyAnswers(surveyInfo.headers, row);
+          // 설문 응답 파싱 → 구글폼 ID 리매핑 → 구조화
+          const rawAnswers = parseSurveyAnswers(surveyInfo.headers, row);
+          const answers = remapFormIds(rawAnswers);
           // Track 1: 직접 매핑 가능한 필드 pre-fill
           surveyFields = prefillFieldsFromSurvey(answers);
-          // Track 2: LLM 컨텍스트용 구조화 텍스트
-          const llmContext = formatSurveyForLLM(answers);
+          // Track 1.5: 파생 계산 (복수 질문 조합 → 중간 지표)
+          const derivedMetrics = computeDerivedMetrics(answers);
+          // Track 2: LLM 컨텍스트용 구조화 텍스트 (파생 메트릭 포함)
+          const llmContext = formatSurveyForLLM(answers, derivedMetrics);
           if (llmContext) {
             combined += `\n\n---\n[사전 설문 구조화 데이터]\n${llmContext}`;
           }
