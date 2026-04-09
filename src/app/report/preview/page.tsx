@@ -79,38 +79,62 @@ export default function PreviewPage() {
     return () => window.removeEventListener('keydown', handleKey);
   }, [currentPage, goTo]);
 
-  const downloadPdf = async () => {
-    if (!fields) return;
+  // 브라우저 인쇄 기능으로 PDF 생성 (서버 Chrome 불필요)
+  const downloadPdf = () => {
+    if (!fields || pages.length === 0) return;
     setPdfLoading(true);
-    try {
-      const res = await fetch('/api/report/pdf', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fields }),
-      });
-      if (!res.ok) {
-        let detail = '';
-        try {
-          const errBody = await res.json();
-          detail = errBody.detail || errBody.error || '';
-        } catch {}
-        throw new Error(detail || `PDF 생성 실패 (${res.status})`);
-      }
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `AX_Report_${fields.companyName || 'report'}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-    } catch (err) {
-      console.error('PDF download error:', err);
-      const msg = err instanceof Error ? err.message : '';
-      alert(`PDF 다운로드에 실패했습니다. ${msg ? `(${msg})` : '다시 시도해주세요.'}`);
-    } finally {
+
+    const printHtml = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>AX Report - ${fields.companyName || 'report'}</title>
+  <style>
+    ${styleTag}
+    @page { size: A4; margin: 0; }
+    body { margin: 0; padding: 0; background: #fff; }
+    .page {
+      width: 794px;
+      max-width: 794px;
+      margin: 0;
+      padding: 0;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      page-break-after: always;
+      page-break-inside: avoid;
+      overflow: hidden;
+    }
+    .page:last-child { page-break-after: auto; }
+    .cover { min-height: auto; }
+    .ending { min-height: auto; }
+  </style>
+</head>
+<body>
+  ${pages.join('\n')}
+</body>
+</html>`;
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert('팝업이 차단됐습니다. 주소창 오른쪽의 팝업 허용 버튼을 클릭한 후 다시 시도해주세요.');
       setPdfLoading(false);
+      return;
+    }
+
+    printWindow.document.write(printHtml);
+    printWindow.document.close();
+
+    // 폰트/이미지 로드 후 인쇄
+    const doPrint = () => {
+      printWindow.focus();
+      printWindow.print();
+      setPdfLoading(false);
+    };
+
+    if (printWindow.document.readyState === 'complete') {
+      setTimeout(doPrint, 300);
+    } else {
+      printWindow.onload = () => setTimeout(doPrint, 300);
     }
   };
 
