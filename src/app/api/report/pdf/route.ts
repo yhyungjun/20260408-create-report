@@ -16,12 +16,10 @@ async function launchBrowser() {
     });
   }
 
-  // 배포 환경 (Vercel, 기타 서버): @sparticuz/chromium-min 사용
-  const chromium = await import('@sparticuz/chromium-min');
+  // 배포 환경: @sparticuz/chromium 사용 (바이너리 패키지에 포함 — CDN 다운로드 불필요)
+  const chromium = await import('@sparticuz/chromium');
   const puppeteer = await import('puppeteer-core');
-  const executablePath = await chromium.default.executablePath(
-    'https://github.com/Sparticuz/chromium/releases/download/v131.0.1/chromium-v131.0.1-pack.tar'
-  );
+  const executablePath = await chromium.default.executablePath();
   return puppeteer.default.launch({
     args: chromium.default.args,
     executablePath,

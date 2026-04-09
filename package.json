@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
-    "@sparticuz/chromium-min": "^131.0.1",
+    "@sparticuz/chromium": "^131.0.1",
     "next": "16.2.2",
     "pdf-parse": "^2.4.5",
     "puppeteer-core": "^24.40.0",
