@@ -231,7 +231,7 @@ export function renderReport(htmlTemplate: string, fields: ReportFields): string
 
   // ── P5 Pain Points 테이블 ──
   if (fields.painPoints && fields.painPoints.length > 0) {
-    const ppRows = fields.painPoints.map(pp => {
+    const ppRows = fields.painPoints.slice(0, 4).map(pp => {
       const prColor = pp.priority.includes('높') ? 'var(--gap-high)' : pp.priority.includes('낮') ? 'var(--gap-low)' : 'var(--gap-mid)';
       return `<tr><td style="font-weight:600">${pp.dept}</td><td>${pp.task}</td><td>${pp.painPoint}</td><td style="text-align:center">${pp.weeklyHours}</td><td style="text-align:center">${pp.aiApplicability}</td><td style="text-align:center"><span style="color:${prColor};font-weight:700">${pp.priority}</span></td></tr>`;
     }).join('\n      ');
@@ -346,7 +346,7 @@ export function renderReport(htmlTemplate: string, fields: ReportFields): string
 
   // ── P10 혁신 과제 테이블 ──
   if (fields.innovationTasks && fields.innovationTasks.length > 0) {
-    const itRows = fields.innovationTasks.map((t, i) => {
+    const itRows = fields.innovationTasks.slice(0, 8).map((t, i) => {
       const prClass = t.priority === 'P1' ? 'tp-high' : t.priority === 'P3' ? 'tp-low' : 'tp-mid';
       return `<tr><td style="font-weight:900;color:var(--brand)">${i + 1}</td><td style="font-weight:600">${t.name}</td><td>${t.dept}</td><td><span class="task-priority tp-mid">${t.type}</span></td><td style="text-align:center">${t.difficulty}</td><td style="text-align:center;font-weight:700;color:var(--gap-low)">${t.effect}</td><td style="text-align:center"><span class="task-priority ${prClass}">${t.priority}</span></td></tr>`;
     }).join('\n      ');
