@@ -7,7 +7,7 @@ import { renderReport } from '@/lib/template-engine';
 
 export default function PreviewPage() {
   const router = useRouter();
-  const { fields } = useReport();
+  const { fields, ready } = useReport();
   const [pages, setPages] = useState<string[]>([]);
   const [styleTag, setStyleTag] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
@@ -18,6 +18,7 @@ export default function PreviewPage() {
   const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (!ready) return;
     if (!fields) {
       router.replace('/report');
       return;

@@ -48,14 +48,14 @@ function GuidanceTooltip({ fieldKey, show, onClose }: { fieldKey: string; show: 
 
 export default function ReviewPage() {
   const router = useRouter();
-  const { fields, setFields, metadata } = useReport();
+  const { fields, setFields, metadata, ready } = useReport();
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [dependencyWarnings, setDependencyWarnings] = useState<string[]>([]);
 
   useEffect(() => {
-    if (!fields) router.replace('/report');
-  }, [fields, router]);
+    if (ready && !fields) router.replace('/report');
+  }, [ready, fields, router]);
 
   const scrollToField = useCallback((fieldId: string) => {
     const el = document.getElementById(fieldId);
@@ -84,7 +84,7 @@ export default function ReviewPage() {
     }
   }, []);
 
-  if (!fields) return null;
+  if (!ready || !fields) return null;
 
   const isLowConfidence = (key: string) =>
     metadata?.lowConfidenceFields?.includes(key) ?? false;

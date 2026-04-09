@@ -255,11 +255,17 @@ export default function ReportInputPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ meetingNotes: combined, surveyFields }),
       });
+      const text = await res.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        throw new Error('서버 응답 파싱 실패. 서버가 정상 실행 중인지 확인해주세요.');
+      }
       if (!res.ok) {
-        const data = await res.json();
         throw new Error(data.error || '분석 실패');
       }
-      const { fields, metadata } = await res.json();
+      const { fields, metadata } = data;
       setFields(fields);
       setMetadata(metadata);
       router.push('/report/review');
