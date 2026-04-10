@@ -2,6 +2,7 @@ import { analyzeMeetingNotesStream } from '@/lib/claude-prompt';
 import type { ReportFields, ExtractMetadata } from '@/lib/report-schema';
 import { computeCacheKey, getCached, setCached } from '@/lib/analysis-cache';
 import { extractMetadata, type ExtractedMeta } from '@/lib/meta-extractor';
+import { extractMissingMetaViaHaiku } from '@/lib/meta-haiku';
 
 export const maxDuration = 120;
 
@@ -40,6 +41,32 @@ function recountMetadata(fields: ReportFields, metadata: ExtractMetadata): void 
   metadata.fieldsMissing = fieldKeys.length - metadata.fieldsExtracted;
 }
 
+/**
+ * Haiku로 추출된 필드를 metadata.lowConfidenceFields에 추가합니다.
+ * 리뷰페이지에서 "확인 필요" 뱃지로 표시되어 리뷰어의 주의를 환기합니다.
+ *
+ * ExtractedMeta 키 → ReportFields 키 매핑:
+ * - companyName, consultantName, diagnosisDate: 동일한 키 사용
+ * - participants: interviewInfo의 자식 필드 → 부모 키(interviewInfo) 사용
+ */
+function addHaikuLowConfidence(
+  metadata: ExtractMetadata,
+  haikuFilledFields: string[],
+): void {
+  const fieldKeyMap: Record<string, string> = {
+    companyName: 'companyName',
+    consultantName: 'consultantName',
+    diagnosisDate: 'diagnosisDate',
+    participants: 'interviewInfo',
+  };
+  for (const key of haikuFilledFields) {
+    const mapped = fieldKeyMap[key];
+    if (mapped && !metadata.lowConfidenceFields.includes(mapped)) {
+      metadata.lowConfidenceFields.push(mapped);
+    }
+  }
+}
+
 export async function POST(request: Request) {
   let meetingNotes: string;
   let surveyFields: Partial<ReportFields> | null;
@@ -62,8 +89,31 @@ export async function POST(request: Request) {
     );
   }
 
-  // ── 1. 라벨 메타데이터 추출 + 본문에서 제거 ──
+  // ── 1. 라벨 메타데이터 추출 + 본문에서 제거 (정규식) ──
   const { meta, strippedNotes } = extractMetadata(meetingNotes);
+
+  // ── 1.5. 정규식이 놓친 필드를 Haiku로 보강 (Layer 3) ──
+  // - 원본 노트를 Haiku에 전달 (strippedNotes 아님) → 자연어 맥락 활용
+  // - 정규식이 찾은 값은 절대 덮어쓰지 않음 (missingKeys만 요청)
+  // - API 에러는 swallow → 정규식 결과만으로 계속 진행
+  const missingKeys = (Object.keys(meta) as (keyof ExtractedMeta)[]).filter(
+    (k) => meta[k] == null,
+  );
+  const haikuFilledFields: string[] = [];
+  if (missingKeys.length > 0) {
+    try {
+      const haikuMeta = await extractMissingMetaViaHaiku(meetingNotes, missingKeys);
+      for (const k of missingKeys) {
+        const v = haikuMeta[k];
+        if (v != null) {
+          meta[k] = v;
+          haikuFilledFields.push(k);
+        }
+      }
+    } catch (err) {
+      console.warn('[Haiku fallback] 실패, 정규식 결과만 사용:', err);
+    }
+  }
 
   // ── 2. 제거된 본문으로 캐시 키 생성 (메타데이터는 제외됨) ──
   const cacheKey = computeCacheKey(strippedNotes, surveyFields);
@@ -77,6 +127,7 @@ export async function POST(request: Request) {
         const fields = JSON.parse(JSON.stringify(cached.fields)) as ReportFields;
         const metadata = JSON.parse(JSON.stringify(cached.metadata)) as ExtractMetadata;
         applyMetadataToFields(fields, meta);
+        addHaikuLowConfidence(metadata, haikuFilledFields);
         recountMetadata(fields, metadata);
         writeLine(controller, { type: 'result', data: { fields, metadata } });
         controller.close();
@@ -125,6 +176,7 @@ export async function POST(request: Request) {
 
           // 현재 요청의 메타데이터 적용
           applyMetadataToFields(result.fields, meta);
+          addHaikuLowConfidence(result.metadata, haikuFilledFields);
           recountMetadata(result.fields, result.metadata);
 
           writeLine(controller, { type: 'result', data: result });
