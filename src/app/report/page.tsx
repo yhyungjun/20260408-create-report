@@ -66,17 +66,10 @@ export default function ReportInputPage() {
   const [progress, setProgress] = useState('');
   const [error, setError] = useState('');
 
-  // 노트 파일 상태
+  // 노트 파일 상태 (textarea의 수동 입력과 별개로 관리)
   const [noteFiles, setNoteFiles] = useState<NoteFile[]>([]);
   const [fileLoading, setFileLoading] = useState(false);
   const noteInputRef = useRef<HTMLInputElement>(null);
-
-  // noteFiles가 변경되면 meetingNotes(Context)에 반영
-  useEffect(() => {
-    if (noteFiles.length === 0) return;
-    const combined = noteFiles.map((f) => `[${f.name}]\n${f.text}`).join('\n\n---\n\n');
-    setMeetingNotes(combined);
-  }, [noteFiles, setMeetingNotes]);
 
   // 설문 상태
   const [surveyFileName, setSurveyFileName] = useState('');
@@ -150,9 +143,7 @@ export default function ReportInputPage() {
   }, [noteFiles]);
 
   const handleRemoveNoteFile = (idx: number) => {
-    const next = noteFiles.filter((_, i) => i !== idx);
-    setNoteFiles(next);
-    if (next.length === 0) setMeetingNotes('');
+    setNoteFiles(noteFiles.filter((_, i) => i !== idx));
   };
 
   // ── CSV 텍스트 → surveyInfo 공통 처리 ──
@@ -226,12 +217,19 @@ export default function ReportInputPage() {
 
   // ── 제출 ──
   const handleSubmit = async () => {
-    if (!meetingNotes.trim() && !surveyInfo) return;
+    if (!meetingNotes.trim() && !surveyInfo && noteFiles.length === 0) return;
     setLoading(true);
     setProgress('');
     setError('');
     try {
-      let combined = meetingNotes.trim();
+      // 수동 입력 + 첨부 파일 내용 결합
+      const parts: string[] = [];
+      if (meetingNotes.trim()) parts.push(meetingNotes.trim());
+      if (noteFiles.length > 0) {
+        const fileText = noteFiles.map((f) => `[${f.name}]\n${f.text}`).join('\n\n---\n\n');
+        parts.push(fileText);
+      }
+      let combined = parts.join('\n\n---\n\n');
       let surveyFields = null;
 
       if (surveyInfo) {
@@ -304,7 +302,7 @@ export default function ReportInputPage() {
     }
   };
 
-  const hasInput = meetingNotes.trim() || surveyInfo;
+  const hasInput = meetingNotes.trim() || surveyInfo || noteFiles.length > 0;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -372,7 +370,7 @@ export default function ReportInputPage() {
           <textarea
             value={meetingNotes}
             onChange={(e) => setMeetingNotes(e.target.value)}
-            placeholder={`미팅 노트를 여기에 붙여넣거나, 파일을 첨부하세요.\n\nPDF, TXT, MD, HTML, JSON, CSV 파일을 여러 개 첨부할 수 있습니다.\n\n예시:\n- 기업명: 주식회사 테스트\n- 업종: IT서비스\n- 직원 수: 45명\n...`}
+            placeholder={`미팅 노트를 여기에 붙여넣거나, 파일을 첨부하세요.\n\nPDF, TXT, MD, HTML, JSON, CSV 파일을 여러 개 첨부할 수 있습니다.\n\n예시:\n- 미팅날짜: 2026년 3월 4일\n- 컨설턴트: 고성현\n- 기업명: 주식회사 조코딩에이엑스파트너스\n- 업종: IT 서비스\n- 직원수: 45명(정규직 35, 비정규직 10)\n...`}
             className="w-full h-72 p-4 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm leading-relaxed text-black"
             disabled={loading}
           />

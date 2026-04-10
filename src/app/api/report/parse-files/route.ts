@@ -1,11 +1,23 @@
+import 'pdf-parse/worker';
 import { NextResponse } from 'next/server';
-import * as pdfParse from 'pdf-parse';
+import { PDFParse } from 'pdf-parse';
 
 const TEXT_EXTENSIONS = ['.txt', '.md', '.csv', '.html', '.json', '.tsv'];
 
 function getExtension(filename: string): string {
   const dot = filename.lastIndexOf('.');
   return dot >= 0 ? filename.slice(dot).toLowerCase() : '';
+}
+
+async function extractPdfText(file: File): Promise<string> {
+  const buffer = await file.arrayBuffer();
+  const parser = new PDFParse({ data: new Uint8Array(buffer) });
+  try {
+    const result = await parser.getText();
+    return result.text;
+  } finally {
+    await parser.destroy();
+  }
 }
 
 export async function POST(request: Request) {
@@ -23,11 +35,8 @@ export async function POST(request: Request) {
       const ext = getExtension(file.name);
 
       if (ext === '.pdf') {
-        const buffer = Buffer.from(await file.arrayBuffer());
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const pdf = ((pdfParse as any).default || pdfParse) as any;
-        const data = await pdf(buffer);
-        results.push({ name: file.name, text: data.text });
+        const text = await extractPdfText(file);
+        results.push({ name: file.name, text });
       } else if (TEXT_EXTENSIONS.includes(ext)) {
         const text = await file.text();
         results.push({ name: file.name, text });

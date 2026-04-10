@@ -175,33 +175,37 @@ export function renderReport(htmlTemplate: string, fields: ReportFields): string
     );
   }
 
-  // ── Top 3 우선 과제 ──
+  // ── 우선 과제 (정확히 4개) ──
   if (fields.topTasks && fields.topTasks.length > 0) {
     const urgencyColor = (u: string) => {
       if (u.includes('높') || u.toLowerCase().includes('high')) return 'var(--gap-high)';
       if (u.includes('낮') || u.toLowerCase().includes('low')) return 'var(--gap-low)';
       return 'var(--gap-mid)';
     };
-    const rows = fields.topTasks.map((task, i) =>
-      `<tr><td style="font-weight:700;color:var(--brand)">${i + 1}</td><td>${task.name}</td><td><span style="background:#f3f0ff;color:var(--brand-dark);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600">${task.module}</span></td><td><span style="color:${urgencyColor(task.urgency)};font-weight:700">● ${task.urgency}</span></td></tr>`
+    const topTasks4 = fields.topTasks.slice(0, 4);
+    // 우선 과제 테이블은 알파벳 부분만 추출 ([A] 워크숍 → [A])
+    const moduleLetter = (m: string) => {
+      const match = m.match(/\[([A-Z])\]/);
+      return match ? `[${match[1]}]` : m;
+    };
+    const rows = topTasks4.map((task, i) =>
+      `<tr><td style="font-weight:700;color:var(--brand)">${i + 1}</td><td>${task.name}</td><td><span style="background:#f3f0ff;color:var(--brand-dark);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600">${moduleLetter(task.module)}</span></td><td><span style="color:${urgencyColor(task.urgency)};font-weight:700">● ${task.urgency}</span></td></tr>`
     ).join('\n      ');
 
-    // 기존 3행을 교체
+    // 기존 4행을 교체
     html = html.replace(
-      /<tr><td style="font-weight:700;color:var\(--brand\)">1<\/td>[\s\S]*?<\/tr>\s*<tr><td style="font-weight:700;color:var\(--brand\)">2<\/td>[\s\S]*?<\/tr>\s*<tr><td style="font-weight:700;color:var\(--brand\)">3<\/td>[\s\S]*?<\/tr>/,
+      /<tr><td style="font-weight:700;color:var\(--brand\)">1<\/td>[\s\S]*?<\/tr>\s*<tr><td style="font-weight:700;color:var\(--brand\)">2<\/td>[\s\S]*?<\/tr>\s*<tr><td style="font-weight:700;color:var\(--brand\)">3<\/td>[\s\S]*?<\/tr>\s*<tr><td style="font-weight:700;color:var\(--brand\)">4<\/td>[\s\S]*?<\/tr>/,
       rows
     );
-  }
 
-  // ── 권장 경로 ──
-  if (fields.recommendedPath && fields.recommendedPath.length > 0) {
-    const pathSpans = fields.recommendedPath
-      .map(p => `<span style="background:var(--brand);color:#fff;padding:3px 10px;border-radius:4px">${p}</span>`)
-      .join('<span style="color:#aaa">→</span>\n        ');
+    // ── 권장 경로 = topTasks의 module(알파벳만) + 과제명 가로형 화살표 ──
+    const pathSteps = topTasks4
+      .map(t => `<div class="path-step" style="display:inline-flex;align-items:center;gap:6px"><span style="background:#f3f0ff;color:var(--brand-dark);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;flex-shrink:0">${moduleLetter(t.module)}</span><span style="color:var(--text)">${t.name}</span></div>`)
+      .join('<span class="path-arrow" style="color:#aaa;font-weight:700">→</span>\n        ');
 
     html = html.replace(
-      /<span style="background:var\(--brand\);color:#fff;padding:3px 10px;border-radius:4px">\[A\] 워크숍<\/span>[\s\S]*?<span style="background:var\(--brand\);color:#fff;padding:3px 10px;border-radius:4px">\[D\] 해커톤<\/span>/,
-      pathSpans
+      /<div class="path-step"[\s\S]*?<\/div>(?:<span class="path-arrow"[\s\S]*?<\/span>\s*<div class="path-step"[\s\S]*?<\/div>){3}/,
+      pathSteps
     );
   }
 
@@ -435,13 +439,13 @@ export function renderReport(htmlTemplate: string, fields: ReportFields): string
     const roiValue = savedHours > 0 ? Math.round((savedHours * 3 * 26) / 100) : 0; // 26주(6개월)
     const roiText = roiValue > 0 ? `${roiValue}%` : '—%';
 
-    // 전체 4개 메트릭 교체
+    // 전체 4개 메트릭 교체 (P7 압축 레이아웃: style="padding:10px 8px")
     html = html.replace(
-      /<div class="metric"><div class="label">총 과제 수<\/div>[\s\S]*?<div class="metric"><div class="label">커버 부서<\/div>[\s\S]*?<\/div><\/div>/,
-      `<div class="metric"><div class="label">총 과제 수</div><div class="score" style="font-size:20px">${taskCount}건</div><div class="target">P1: ${p1Count} / P2: ${p2Count} / P3: ${p3Count}</div></div>
-      <div class="metric"><div class="label">예상 시간절감</div><div class="score" style="font-size:20px">${savedHours > 0 ? savedHours + 'h' : '—'}</div><div class="target">주당 (전체 합산)</div></div>
-      <div class="metric"><div class="label">예상 ROI</div><div class="score" style="font-size:20px">${roiText}</div><div class="target">6개월 누적</div></div>
-      <div class="metric"><div class="label">커버 부서</div><div class="score" style="font-size:20px">${deptCount}개</div><div class="target">${deptCount >= 4 ? '전 부서 포함' : '주요 부서'}</div></div>`
+      /<div class="metric"[^>]*><div class="label">총 과제 수<\/div>[\s\S]*?<div class="metric"[^>]*><div class="label">커버 부서<\/div>[\s\S]*?<\/div><\/div>/,
+      `<div class="metric" style="padding:10px 8px"><div class="label">총 과제 수</div><div class="score" style="font-size:18px">${taskCount}건</div><div class="target">P1: ${p1Count} / P2: ${p2Count} / P3: ${p3Count}</div></div>
+      <div class="metric" style="padding:10px 8px"><div class="label">예상 시간절감</div><div class="score" style="font-size:18px">${savedHours > 0 ? savedHours + 'h' : '—'}</div><div class="target">주당 (전체 합산)</div></div>
+      <div class="metric" style="padding:10px 8px"><div class="label">예상 ROI</div><div class="score" style="font-size:18px">${roiText}</div><div class="target">6개월 누적</div></div>
+      <div class="metric" style="padding:10px 8px"><div class="label">커버 부서</div><div class="score" style="font-size:18px">${deptCount}개</div><div class="target">${deptCount >= 4 ? '전 부서 포함' : '주요 부서'}</div></div>`
     );
   }
 

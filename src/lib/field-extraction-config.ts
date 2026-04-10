@@ -25,6 +25,12 @@ export interface FieldExtractionConfig {
   defaultValue?: unknown;
   confidenceSignals: { high: string; low: string };
   reviewerHint: string;
+  /**
+   * true면 Claude에 노출하지 않음 (프롬프트·스키마에서 제외).
+   * 정규식(meta-extractor)으로 추출하여 서버가 주입하는 메타 필드용.
+   * 리뷰 UI/검증에는 계속 사용됨.
+   */
+  isMetaOnly?: boolean;
 }
 
 // ── 34개 필드 설정 ──
@@ -45,6 +51,7 @@ export const EXTRACTION_CONFIG: FieldExtractionConfig[] = [
       low: '브랜드명만 언급되고 법인명 불분명',
     },
     reviewerHint: '정식 법인명인지 확인. 브랜드명과 다를 수 있음',
+    isMetaOnly: true,
   },
   {
     key: 'industry',
@@ -222,30 +229,30 @@ export const EXTRACTION_CONFIG: FieldExtractionConfig[] = [
       '각 과제의 긴급도 관련 언급 (시급, 중요 등)',
       '과제별 대응 가능 모듈 (A~F) 매핑 근거',
     ],
-    threshold: { requiredCount: 3 },
-    collectionIntent: 'P3 Top 3 과제 테이블, 혁신 과제 확장의 기반',
-    templateUsage: ['P3 Top 3 과제 테이블'],
+    threshold: { requiredCount: 4 },
+    collectionIntent: 'P2 우선 과제 테이블(정확히 4개), 혁신 과제 확장의 기반. recommendedPath는 이 topTasks의 module 값 4개로 자동 구성됨',
+    templateUsage: ['P2 우선 과제 테이블', 'P2 권장 경로(topTasks.module 기반 자동 생성)'],
     dependencies: [],
     confidenceSignals: {
-      high: '미팅에서 3개 이상 과제가 구체적으로 논의됨',
+      high: '미팅에서 4개 이상 과제가 구체적으로 논의됨',
       low: '과제가 명확히 정의되지 않아 AI가 대부분 추론',
     },
-    reviewerHint: '정확히 3개 과제, 긴급도(높음/중간/낮음), 모듈(A~F) 확인',
+    reviewerHint: '정확히 4개 과제, 긴급도(높음/중간/낮음), 모듈(A~F) 확인. 권장 경로가 이 모듈 순서대로 렌더링됨',
   },
   {
     key: 'recommendedPath',
-    extractionMethod: '추론생성',
-    source: '도입 순서 논의 또는 과제 우선순위 기반 경로 생성',
-    rawDataNeeded: ['단계별 도입 계획 언급', '우선 영역 → 확장 영역 순서'],
-    threshold: { requiredCount: 3 },
-    collectionIntent: 'P3 권장 경로 시각화 (화살표 흐름)',
-    templateUsage: ['P3 권장 경로'],
+    extractionMethod: '복합계산',
+    source: 'topTasks의 module 값 4개를 그대로 순서대로 사용 (AI 별도 생성 불필요)',
+    rawDataNeeded: ['topTasks의 4개 module 값'],
+    threshold: {},
+    collectionIntent: 'P2 권장 경로 시각화 — topTasks.module 순서 그대로 렌더링',
+    templateUsage: ['P2 권장 경로'],
     dependencies: ['topTasks'],
     confidenceSignals: {
-      high: '도입 순서가 미팅에서 직접 논의됨',
-      low: 'topTasks 기반으로 AI가 순서를 추론',
+      high: 'topTasks가 4개로 완성됨',
+      low: 'topTasks가 부족함',
     },
-    reviewerHint: '모듈 순서가 논리적인지 확인 (기반→확장→고도화)',
+    reviewerHint: 'topTasks와 동일한 module 순서가 렌더링되는지 확인',
   },
 
   // ━━ 그룹 4: SWOT & 환경 분석 ━━
@@ -585,6 +592,7 @@ export const EXTRACTION_CONFIG: FieldExtractionConfig[] = [
       low: '날짜 표기 없음',
     },
     reviewerHint: 'YYYY.MM.DD 형식 확인. 미팅일과 진단일이 다를 수 있음',
+    isMetaOnly: true,
   },
   {
     key: 'consultantName',
@@ -600,6 +608,7 @@ export const EXTRACTION_CONFIG: FieldExtractionConfig[] = [
       low: '담당자 이름 언급 없음',
     },
     reviewerHint: '실제 컨설턴트 이름과 일치하는지 확인',
+    isMetaOnly: true,
   },
   {
     key: 'interviewInfo',
@@ -615,6 +624,7 @@ export const EXTRACTION_CONFIG: FieldExtractionConfig[] = [
       low: '참석자 수나 일시가 불분명',
     },
     reviewerHint: 'participants는 숫자만, date는 날짜 형식 확인',
+    isMetaOnly: true,
   },
 ];
 
@@ -631,6 +641,8 @@ export function getFieldConfig(key: string): FieldExtractionConfig | undefined {
 export function getToolSchemaDescriptions(): Record<string, string> {
   const result: Record<string, string> = {};
   for (const cfg of EXTRACTION_CONFIG) {
+    // isMetaOnly 필드는 Claude에 노출하지 않음 (정규식으로 서버 주입)
+    if (cfg.isMetaOnly) continue;
     const parts: string[] = [cfg.collectionIntent];
     if (cfg.threshold.required) parts.push('필수');
     if (cfg.threshold.maxLength) parts.push(`최대 ${cfg.threshold.maxLength}자`);
@@ -663,6 +675,8 @@ export function getExtractionPromptSection(): string {
   };
 
   for (const cfg of EXTRACTION_CONFIG) {
+    // isMetaOnly 필드는 Claude 프롬프트에 노출하지 않음 (정규식으로 서버 주입)
+    if (cfg.isMetaOnly) continue;
     groups[cfg.extractionMethod].push(cfg);
   }
 
