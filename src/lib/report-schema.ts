@@ -75,10 +75,22 @@ export interface FieldGroup {
 
 export const FIELD_GROUPS: FieldGroup[] = [
   {
+    name: '표지 메타 정보',
+    color: '#1F2937',
+    fields: [
+      { key: 'companyName', label: '기업명', type: 'text' },
+      { key: 'diagnosisDate', label: '진단일 (YYYY.MM.DD)', type: 'text' },
+      { key: 'consultantName', label: '컨설턴트명', type: 'text' },
+      { key: 'interviewInfo', label: '인터뷰 정보', type: 'object', subFields: [
+        { key: 'participants', label: '참석자 수', type: 'text' },
+        { key: 'date', label: '인터뷰 일시', type: 'text' },
+      ]},
+    ],
+  },
+  {
     name: '기업 기본정보',
     color: '#7C3AED',
     fields: [
-      { key: 'companyName', label: '기업명', type: 'text' },
       { key: 'industry', label: '업종/산업군', type: 'text' },
       { key: 'employees', label: '임직원 수', type: 'object', subFields: [
         { key: 'total', label: '전체', type: 'number' },
@@ -246,18 +258,6 @@ export const FIELD_GROUPS: FieldGroup[] = [
       { key: 'milestones', label: '마일스톤 (M1~M4)', type: 'array', subFields: [
         { key: 'label', label: '시점 (예: M1 말)', type: 'text' },
         { key: 'items', label: '달성 항목', type: 'text' },
-      ]},
-    ],
-  },
-  {
-    name: '메타 정보',
-    color: '#6B7280',
-    fields: [
-      { key: 'diagnosisDate', label: '진단일 (YYYY.MM.DD)', type: 'text' },
-      { key: 'consultantName', label: '컨설턴트명', type: 'text' },
-      { key: 'interviewInfo', label: '인터뷰 정보', type: 'object', subFields: [
-        { key: 'participants', label: '참석자 수', type: 'text' },
-        { key: 'date', label: '인터뷰 일시', type: 'text' },
       ]},
     ],
   },

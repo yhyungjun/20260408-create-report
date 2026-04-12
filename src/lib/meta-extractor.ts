@@ -38,12 +38,24 @@ function buildRegex(labels: string[]): RegExp {
   const escaped = labels
     .map(l => l.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s*'))
     .join('|');
-  // ^[공백/불릿]*  (라벨)  [공백]*  [:|：]  [공백]*  (값)  [공백]*$
+  // 콜론 있는 패턴: "라벨: 값" 또는 "라벨 ： 값"
+  // 콜론 없는 패턴: "라벨 값" (공백만으로 구분, 값이 비어있지 않아야 함)
   return new RegExp(
-    `^[\\s\\-•*]*(?:${escaped})[\\s]*[:：][\\s]*(.+?)[\\s]*$`,
+    `^[\\s\\-•*]*(?:${escaped})[\\s]*(?:[:：][\\s]*|\\s+)(.+?)[\\s]*$`,
     'm',
   );
 }
+
+// ── 날짜 전용 패턴 (라벨 없이 날짜만 단독으로 한 줄에 있는 경우) ──
+// "2026년 3월 4일", "2026.03.04", "2026-03-04", "3월 4일" 등
+const DATE_ONLY_PATTERNS = [
+  // 2026년 3월 4일 / 2026년 03월 04일
+  /^[\s\-•*]*(\d{4})년\s*(\d{1,2})월\s*(\d{1,2})일[\s]*$/m,
+  // 3월 4일 (연도 없음 → 올해 적용)
+  /^[\s\-•*]*(\d{1,2})월\s*(\d{1,2})일[\s]*$/m,
+  // 2026.03.04 / 2026-03-04 (한 줄에 날짜만)
+  /^[\s\-•*]*(\d{4})[.\-/](\d{1,2})[.\-/](\d{1,2})[\s]*$/m,
+];
 
 const COMPILED = FIELD_SPECS.map(spec => ({
   ...spec,
@@ -70,6 +82,29 @@ export function extractMetadata(rawNotes: string): {
         meta[key] = value;
         // 매칭된 줄 전체를 제거 (해당 라인을 빈 줄로 대체)
         stripped = stripped.replace(regex, '');
+      }
+    }
+  }
+
+  // ── 날짜 전용 패턴: 라벨 없이 날짜만 한 줄에 있는 경우 (diagnosisDate가 아직 null일 때만) ──
+  if (!meta.diagnosisDate) {
+    const year = new Date().getFullYear();
+    for (const pattern of DATE_ONLY_PATTERNS) {
+      const m = stripped.match(pattern);
+      if (m) {
+        if (m.length === 4) {
+          // 연도 + 월 + 일 (그룹 3개)
+          const [, y, mo, d] = m;
+          meta.diagnosisDate = `${y}.${mo.padStart(2, '0')}.${d.padStart(2, '0')}`;
+        } else if (m.length === 3) {
+          // 월 + 일 (연도 없음 → 올해)
+          const [, mo, d] = m;
+          meta.diagnosisDate = `${year}.${mo.padStart(2, '0')}.${d.padStart(2, '0')}`;
+        }
+        if (meta.diagnosisDate) {
+          stripped = stripped.replace(pattern, '');
+          break;
+        }
       }
     }
   }
