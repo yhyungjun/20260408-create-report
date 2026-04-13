@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
 import type { ReportFields, ExtractMetadata } from '@/lib/report-schema';
 
 const STORAGE_KEY_FIELDS = 'report_fields';
@@ -26,22 +26,20 @@ interface ReportContextType {
 
 const ReportContext = createContext<ReportContextType | null>(null);
 
+function readStorage<T>(key: string): T | null {
+  try {
+    const v = sessionStorage.getItem(key);
+    return v ? JSON.parse(v) : null;
+  } catch {
+    return null;
+  }
+}
+
 export function ReportProvider({ children }: { children: ReactNode }) {
   const [meetingNotes, setMeetingNotes] = useState('');
-  const [fields, setFieldsRaw] = useState<ReportFields | null>(null);
-  const [metadata, setMetadataRaw] = useState<ExtractMetadata | null>(null);
-  const [ready, setReady] = useState(false);
-
-  // 마운트 후 sessionStorage에서 복원 (hydration 안전)
-  useEffect(() => {
-    try {
-      const storedFields = sessionStorage.getItem(STORAGE_KEY_FIELDS);
-      const storedMeta = sessionStorage.getItem(STORAGE_KEY_METADATA);
-      if (storedFields) setFieldsRaw(JSON.parse(storedFields));
-      if (storedMeta) setMetadataRaw(JSON.parse(storedMeta));
-    } catch {}
-    setReady(true);
-  }, []);
+  const [fields, setFieldsRaw] = useState<ReportFields | null>(() => readStorage(STORAGE_KEY_FIELDS));
+  const [metadata, setMetadataRaw] = useState<ExtractMetadata | null>(() => readStorage(STORAGE_KEY_METADATA));
+  const ready = true;
 
   const setFields = useCallback((f: ReportFields) => {
     setFieldsRaw(f);
