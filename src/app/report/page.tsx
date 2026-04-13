@@ -89,18 +89,23 @@ export default function ReportInputPage() {
   const [sheetsUrl, setSheetsUrl] = useState('');
   const [sheetsFetching, setSheetsFetching] = useState(false);
 
-  // ── 페이지 로드 시 이전 리포트 목록 로드 ──
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await fetch('/api/report/db');
-        if (!res.ok) return;
-        const { reports } = await res.json();
-        setSavedReports(reports);
-      } catch { /* 무시 */ }
-      finally { setReportsLoading(false); }
-    })();
+  // ── 이전 리포트 목록 로드 (마운트 + 페이지 포커스 시) ──
+  const loadReports = useCallback(async () => {
+    try {
+      const res = await fetch('/api/report/db', { cache: 'no-store' });
+      if (!res.ok) return;
+      const { reports } = await res.json();
+      setSavedReports(reports);
+    } catch { /* 무시 */ }
+    finally { setReportsLoading(false); }
   }, []);
+
+  useEffect(() => {
+    loadReports();
+    const onFocus = () => loadReports();
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+  }, [loadReports]);
 
   const handleLoadReport = useCallback(async (id: string) => {
     setLoading(true);
@@ -351,7 +356,9 @@ export default function ReportInputPage() {
           const { report: saved } = await saveRes.json();
           if (saved?.id) setReportId(saved.id);
         }
-      } catch { /* 저장 실패해도 분석 결과는 유지 */ }
+      } catch (saveErr) {
+        console.error('리포트 자동 저장 실패:', saveErr);
+      }
 
       router.push('/report/review');
     } catch (e) {
