@@ -48,7 +48,7 @@ function GuidanceTooltip({ fieldKey, show, onClose }: { fieldKey: string; show: 
 
 export default function ReviewPage() {
   const router = useRouter();
-  const { fields, setFields, metadata, ready, reportId } = useReport();
+  const { fields, setFields, metadata, ready, reportId, reportTitle, setReportTitle } = useReport();
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [dependencyWarnings, setDependencyWarnings] = useState<string[]>([]);
@@ -63,7 +63,11 @@ export default function ReviewPage() {
       const res = await fetch(`/api/report/db?id=${reportId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fields, metadata }),
+        body: JSON.stringify({
+          title: reportTitle || `${fields?.companyName || '미정'} - ${fields?.diagnosisDate || new Date().toISOString().slice(0, 10)}`,
+          fields,
+          metadata,
+        }),
       });
       if (!res.ok) throw new Error('저장 실패');
       setSaveMsg('저장 완료');
@@ -73,7 +77,7 @@ export default function ReviewPage() {
     } finally {
       setSaving(false);
     }
-  }, [fields, metadata, reportId]);
+  }, [fields, metadata, reportId, reportTitle]);
 
   useEffect(() => {
     if (ready && !fields) router.replace('/report');
@@ -382,6 +386,18 @@ export default function ReviewPage() {
       </div>
 
       <div className="max-w-3xl mx-auto px-4 py-8">
+        {/* 리포트 제목 */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
+          <label className="text-xs font-semibold text-gray-500 mb-1 block">리포트 제목</label>
+          <input
+            type="text"
+            value={reportTitle}
+            onChange={(e) => setReportTitle(e.target.value)}
+            placeholder={fields?.companyName ? `${fields.companyName} - ${fields.diagnosisDate || new Date().toISOString().slice(0, 10)}` : '제목을 입력하세요'}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          />
+        </div>
+
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-xl font-bold text-gray-900 mb-2">리뷰 & 수정</h1>

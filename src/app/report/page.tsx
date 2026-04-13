@@ -346,10 +346,11 @@ export default function ReportInputPage() {
 
       // DB에 자동 저장
       try {
-        let baseTitle = `${fields.companyName || '미정'} - ${fields.diagnosisDate || new Date().toISOString().slice(0, 10)}`;
-        // 동일 이름 중복 처리
-        const existing = savedReports.filter((r) => r.title === baseTitle || r.title.startsWith(`${baseTitle}(`));
-        if (existing.length > 0) baseTitle = `${baseTitle}(${existing.length + 1})`;
+        const rawTitle = `${fields.companyName || '미정'} - ${fields.diagnosisDate || new Date().toISOString().slice(0, 10)}`;
+        // 동일 이름 중복 처리: (1), (2), ...
+        let baseTitle = rawTitle;
+        const existing = savedReports.filter((r) => r.title === rawTitle || /\(\d+\)$/.test(r.title) && r.title.startsWith(rawTitle));
+        if (existing.length > 0) baseTitle = `${rawTitle}(${existing.length})`;
 
         const saveBody = {
           title: baseTitle,

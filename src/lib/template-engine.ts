@@ -208,9 +208,9 @@ export function renderReport(htmlTemplate: string, fields: ReportFields): string
       rows
     );
 
-    // ── 권장 경로 = topTasks의 module(알파벳만) + 과제명 가로형 화살표 ──
+    // ── 권장 경로 = topTasks의 대응모듈(알파벳+이름) 가로형 화살표 ──
     const pathSteps = topTasks4
-      .map(t => `<div class="path-step" style="display:inline-flex;align-items:center;gap:6px"><span style="background:#f3f0ff;color:var(--brand-dark);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;flex-shrink:0">${moduleLetter(t.module)}</span><span style="color:var(--text)">${t.name}</span></div>`)
+      .map(t => `<div class="path-step" style="display:inline-flex;align-items:center;gap:6px"><span style="background:#f3f0ff;color:var(--brand-dark);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;flex-shrink:0">${t.module}</span></div>`)
       .join('<span class="path-arrow" style="color:#aaa;font-weight:700">→</span>\n        ');
 
     html = html.replace(
