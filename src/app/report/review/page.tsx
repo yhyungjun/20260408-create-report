@@ -394,7 +394,7 @@ export default function ReviewPage() {
             value={reportTitle}
             onChange={(e) => setReportTitle(e.target.value)}
             placeholder={fields?.companyName ? `${fields.companyName} - ${fields.diagnosisDate || new Date().toISOString().slice(0, 10)}` : '제목을 입력하세요'}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
           />
         </div>
 
