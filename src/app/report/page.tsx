@@ -76,6 +76,11 @@ export default function ReportInputPage() {
   const [surveyInfo, setSurveyInfo] = useState<SurveyInfo | null>(null);
   const [selectedCompanyIdx, setSelectedCompanyIdx] = useState(0);
 
+  // Caret 연동 상태
+  const [caretOpen, setCaretOpen] = useState(false);
+  const [caretNotes, setCaretNotes] = useState<{ id: string; title: string; createdAt: string; tags: string[]; durationMin: number }[]>([]);
+  const [caretLoading, setCaretLoading] = useState(false);
+
   // Google Sheets 상태
   const [sheetsUrl, setSheetsUrl] = useState('');
   const [sheetsFetching, setSheetsFetching] = useState(false);
@@ -302,6 +307,40 @@ export default function ReportInputPage() {
     }
   };
 
+  // ── Caret 노트 목록 불러오기 ──
+  const handleCaretOpen = useCallback(async () => {
+    setCaretOpen(true);
+    setCaretLoading(true);
+    try {
+      const res = await fetch('/api/report/fetch-caret?action=list');
+      if (!res.ok) throw new Error('Caret 노트 목록을 불러올 수 없습니다.');
+      const { notes } = await res.json();
+      setCaretNotes(notes);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Caret 연동 오류');
+      setCaretOpen(false);
+    } finally {
+      setCaretLoading(false);
+    }
+  }, []);
+
+  const handleCaretSelect = useCallback(async (noteId: string) => {
+    setCaretLoading(true);
+    try {
+      const res = await fetch(`/api/report/fetch-caret?action=detail&noteId=${noteId}`);
+      if (!res.ok) throw new Error('Caret 노트를 불러올 수 없습니다.');
+      const { content, title } = await res.json();
+      if (content) {
+        setMeetingNotes(meetingNotes ? `${meetingNotes}\n\n---\n[Caret: ${title}]\n${content}` : content);
+      }
+      setCaretOpen(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Caret 노트 로드 오류');
+    } finally {
+      setCaretLoading(false);
+    }
+  }, [meetingNotes, setMeetingNotes]);
+
   const hasInput = meetingNotes.trim() || surveyInfo || noteFiles.length > 0;
 
   return (
@@ -327,6 +366,18 @@ export default function ReportInputPage() {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-2">
             <label className="text-sm font-semibold text-gray-700">미팅 노트</label>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={handleCaretOpen}
+                disabled={loading || caretLoading}
+                className={`text-sm font-medium flex items-center gap-1.5 ${caretLoading ? 'text-gray-400' : 'text-green-600 hover:text-green-800'}`}
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                {caretLoading ? 'Caret 로딩...' : 'Caret에서 가져오기'}
+              </button>
             <label className={`cursor-pointer text-sm font-medium flex items-center gap-1.5 ${fileLoading ? 'text-gray-400' : 'text-purple-600 hover:text-purple-800'}`}>
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
@@ -342,7 +393,39 @@ export default function ReportInputPage() {
                 disabled={loading || fileLoading}
               />
             </label>
+            </div>
           </div>
+
+          {/* Caret 노트 선택 모달 */}
+          {caretOpen && (
+            <div className="mb-4 border border-green-200 rounded-lg bg-green-50 p-4">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-semibold text-green-800">Caret 미팅 노트 선택</span>
+                <button onClick={() => setCaretOpen(false)} className="text-gray-400 hover:text-gray-600 text-lg leading-none">&times;</button>
+              </div>
+              {caretLoading ? (
+                <p className="text-sm text-gray-500">노트 목록을 불러오는 중...</p>
+              ) : caretNotes.length === 0 ? (
+                <p className="text-sm text-gray-500">Caret에 저장된 미팅 노트가 없습니다.</p>
+              ) : (
+                <div className="max-h-60 overflow-y-auto space-y-2">
+                  {caretNotes.map((note) => (
+                    <button
+                      key={note.id}
+                      onClick={() => handleCaretSelect(note.id)}
+                      className="w-full text-left p-3 bg-white border border-gray-200 rounded-lg hover:border-green-400 hover:bg-green-50 transition-colors"
+                    >
+                      <div className="text-sm font-medium text-gray-900">{note.title}</div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        {new Date(note.createdAt).toLocaleDateString('ko-KR')} · {note.durationMin}분
+                        {note.tags.length > 0 && ` · ${note.tags.join(', ')}`}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* 업로드된 파일 목록 */}
           {noteFiles.length > 0 && (
