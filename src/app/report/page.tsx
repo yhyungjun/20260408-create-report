@@ -432,29 +432,54 @@ export default function ReportInputPage() {
         </div>
 
         {/* 이전 리포트 목록 */}
-        {!reportsLoading && savedReports.length > 0 && (
+        {!reportsLoading && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
             <label className="text-sm font-semibold text-gray-700 mb-3 block">이전 리포트</label>
-            <div className="space-y-2">
-              {savedReports.map((r) => (
-                <button
-                  key={r.id}
-                  onClick={() => handleLoadReport(r.id)}
-                  disabled={loading}
-                  className="w-full text-left p-4 rounded-lg border-2 border-gray-200 bg-white hover:border-purple-300 hover:bg-purple-50/30 transition-all"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-semibold text-gray-900 text-sm">{r.title}</span>
+            {savedReports.length === 0 ? (
+              <div className="text-center py-6 text-sm text-gray-400">
+                저장된 리포트가 없습니다.
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {savedReports.map((r) => (
+                  <div
+                    key={r.id}
+                    className="flex items-center gap-2"
+                  >
+                    <button
+                      onClick={() => handleLoadReport(r.id)}
+                      disabled={loading}
+                      className="flex-1 text-left p-4 rounded-lg border-2 border-gray-200 bg-white hover:border-purple-300 hover:bg-purple-50/30 transition-all"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-semibold text-gray-900 text-sm">{r.title}</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-500">
+                        {r.company_name && (
+                          <span>기업명: <span className="text-gray-700">{r.company_name}</span></span>
+                        )}
+                        <span>생성일: <span className="text-gray-700">{new Date(r.created_at).toLocaleDateString('ko-KR')}</span></span>
+                      </div>
+                    </button>
+                    <button
+                      onClick={async () => {
+                        if (!confirm(`"${r.title}" 리포트를 삭제하시겠습니까?`)) return;
+                        try {
+                          await fetch(`/api/report/db?id=${r.id}`, { method: 'DELETE' });
+                          setSavedReports(savedReports.filter((s) => s.id !== r.id));
+                        } catch { /* 무시 */ }
+                      }}
+                      className="p-2 text-gray-400 hover:text-red-500 transition-colors shrink-0"
+                      title="삭제"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
                   </div>
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-500">
-                    {r.company_name && (
-                      <span>기업명: <span className="text-gray-700">{r.company_name}</span></span>
-                    )}
-                    <span>생성일: <span className="text-gray-700">{new Date(r.created_at).toLocaleDateString('ko-KR')}</span></span>
-                  </div>
-                </button>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 

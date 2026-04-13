@@ -118,3 +118,7 @@ export async function updateReport(
   });
   return parseRow(row);
 }
+
+export async function deleteReport(id: string): Promise<void> {
+  await apphubFetch<{ message: string }>(rowUrl(id), { method: 'DELETE' });
+}
