@@ -272,17 +272,22 @@ function MeetingGuidePanel({ answers, companyName, onClose }: {
           </div>
         </button>
         {isExpanded && (
-          <div className="px-2.5 pb-2.5 space-y-1.5">
+          <div className="px-2.5 pb-2.5 space-y-1.5 overflow-hidden">
             {surveyIds.length > 0 && (
-              <div className="bg-white rounded border border-gray-100 p-2 space-y-0.5">
+              <div className="bg-white rounded border border-gray-100 p-2 space-y-1.5">
                 {surveyIds.map(id => {
                   const answer = answers[id];
                   const sq = getSurveyQuestion(id);
                   return (
-                    <div key={id} className="text-[11px] flex items-start gap-1.5">
-                      <span className={`font-mono font-semibold shrink-0 ${answer ? 'text-green-600' : 'text-red-500'}`}>{id}</span>
-                      <span className="text-gray-400 shrink-0">{sq?.questionText}</span>
-                      {answer ? <span className="text-gray-700">{answer}</span> : <span className="text-red-400">미응답</span>}
+                    <div key={id} className="text-[11px] overflow-hidden">
+                      <div className="flex items-center gap-1.5">
+                        <span className={`font-mono font-semibold shrink-0 ${answer ? 'text-green-600' : 'text-red-500'}`}>{id}</span>
+                        <span className="text-gray-400 truncate">{sq?.questionText}</span>
+                        {!answer && <span className="text-red-400 shrink-0">미응답</span>}
+                      </div>
+                      {answer && (
+                        <div className="text-gray-700 mt-0.5 pl-6 break-words line-clamp-3">{answer}</div>
+                      )}
                     </div>
                   );
                 })}
