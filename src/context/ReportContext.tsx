@@ -77,12 +77,14 @@ export function ReportProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
 
   // 마운트 후 sessionStorage에서 복원 (SSR hydration mismatch 방지)
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     setFieldsRaw(readStorage(STORAGE_KEY_FIELDS));
     setMetadataRaw(readStorage(STORAGE_KEY_METADATA));
     setSurveyAnswersRaw(readStorage(STORAGE_KEY_SURVEY));
     setReady(true);
   }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const setFields = useCallback((f: ReportFields) => {
     setFieldsRaw(f);

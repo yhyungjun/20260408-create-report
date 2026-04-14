@@ -1,0 +1,241 @@
+<h2>스펙 문서 전체 내용</h2>
+<p class="subtitle">docs/superpowers/specs/2026-04-05-report-generator-design.md</p>
+
+<!-- 개요 -->
+<div class="section">
+  <h3>개요</h3>
+  <div style="background:#f9fafb;border-radius:8px;padding:16px;font-size:13px;line-height:1.8;">
+    미팅 노트를 붙여넣으면 Claude API가 구조화된 데이터를 추출하고, 사람이 리뷰/수정한 뒤, 기존 report.html 템플릿에 값을 주입하여 PDF를 생성하는 Next.js 웹앱.<br><br>
+    <strong>사용자:</strong> 조코딩 AX 파트너스 컨설턴트 + 클라이언트 기업 (공유 용도)<br>
+    <strong>배포:</strong> 로컬 개발 우선 (추후 Vercel 배포 가능)
+  </div>
+</div>
+
+<!-- 유저 플로우 -->
+<div class="section">
+  <h3>유저 플로우</h3>
+  <div style="display:flex;gap:12px;align-items:stretch;">
+    <div style="flex:1;background:#f3f0ff;border-radius:8px;padding:14px;text-align:center;">
+      <div style="font-size:11px;color:#7C3AED;font-weight:700;">STEP 1</div>
+      <div style="font-size:13px;font-weight:600;margin-top:4px;">미팅 노트 붙여넣기</div>
+      <div style="font-size:11px;color:#888;margin-top:4px;">POST /api/report/analyze</div>
+    </div>
+    <div style="display:flex;align-items:center;color:#aaa;">→</div>
+    <div style="flex:1;background:#fef9c3;border-radius:8px;padding:14px;text-align:center;">
+      <div style="font-size:11px;color:#92400e;font-weight:700;">STEP 2</div>
+      <div style="font-size:13px;font-weight:600;margin-top:4px;">리뷰 & 수정</div>
+      <div style="font-size:11px;color:#888;margin-top:4px;">클라이언트 state</div>
+    </div>
+    <div style="display:flex;align-items:center;color:#aaa;">→</div>
+    <div style="flex:1;background:#dcfce7;border-radius:8px;padding:14px;text-align:center;">
+      <div style="font-size:11px;color:#166534;font-weight:700;">STEP 3</div>
+      <div style="font-size:13px;font-weight:600;margin-top:4px;">PDF 다운로드</div>
+      <div style="font-size:11px;color:#888;margin-top:4px;">POST /api/report/pdf</div>
+    </div>
+  </div>
+</div>
+
+<!-- 기술 스택 -->
+<div class="section">
+  <h3>기술 스택</h3>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <span style="background:#f3f0ff;color:#7C3AED;padding:5px 14px;border-radius:6px;font-size:12px;font-weight:600;">Next.js 16 (App Router)</span>
+    <span style="background:#f3f0ff;color:#7C3AED;padding:5px 14px;border-radius:6px;font-size:12px;font-weight:600;">TypeScript</span>
+    <span style="background:#f3f0ff;color:#7C3AED;padding:5px 14px;border-radius:6px;font-size:12px;font-weight:600;">Tailwind CSS v4</span>
+    <span style="background:#f3f0ff;color:#7C3AED;padding:5px 14px;border-radius:6px;font-size:12px;font-weight:600;">Claude API (@anthropic-ai/sdk)</span>
+    <span style="background:#f3f0ff;color:#7C3AED;padding:5px 14px;border-radius:6px;font-size:12px;font-weight:600;">Puppeteer (PDF)</span>
+    <span style="background:#f3f0ff;color:#7C3AED;padding:5px 14px;border-radius:6px;font-size:12px;font-weight:600;">React Context (상태관리)</span>
+  </div>
+</div>
+
+<!-- 페이지 구조 -->
+<div class="section">
+  <h3>페이지 구조 (3개)</h3>
+  <div style="display:flex;flex-direction:column;gap:10px;">
+    <div style="border:1px solid #e5e5e5;border-radius:8px;padding:14px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <code style="background:#f3f0ff;color:#7C3AED;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:700;">/report</code>
+        <strong style="font-size:13px;">미팅 노트 입력</strong>
+      </div>
+      <div style="font-size:12px;color:#555;line-height:1.8;">textarea (노트 붙여넣기) · "리포트 생성" 버튼 · 로딩 스피너 · 에러 메시지</div>
+    </div>
+    <div style="border:1px solid #e5e5e5;border-radius:8px;padding:14px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <code style="background:#fef9c3;color:#92400e;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:700;">/report/review</code>
+        <strong style="font-size:13px;">리뷰 & 수정</strong>
+      </div>
+      <div style="font-size:12px;color:#555;line-height:1.8;">6개 섹션 폼 · 편집 가능한 input/textarea · null 필드 = 노란색 경고 · low confidence = 주황색 표시 · "리포트 확정" 버튼</div>
+    </div>
+    <div style="border:1px solid #e5e5e5;border-radius:8px;padding:14px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <code style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:700;">/report/preview</code>
+        <strong style="font-size:13px;">미리보기 & PDF</strong>
+      </div>
+      <div style="font-size:12px;color:#555;line-height:1.8;">template-engine으로 치환된 HTML → iframe srcdoc 렌더링 · "PDF 다운로드" 버튼 · "다시 수정" 버튼</div>
+    </div>
+  </div>
+</div>
+
+<!-- API -->
+<div class="section">
+  <h3>API 엔드포인트 (2개)</h3>
+  <div style="display:flex;flex-direction:column;gap:10px;">
+    <div style="border:1px solid #e5e5e5;border-radius:8px;padding:14px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <span style="background:#7C3AED;color:#fff;padding:2px 10px;border-radius:4px;font-size:11px;font-weight:700;">POST</span>
+        <code style="font-size:13px;font-weight:600;">/api/report/analyze</code>
+      </div>
+      <div style="font-size:12px;color:#555;line-height:1.8;">
+        입력: <code>{ meetingNotes: string }</code><br>
+        동작: Claude API (tool_use)로 미팅 노트 → 25개 필드 JSON<br>
+        출력: <code>{ fields: {...}, metadata: { fieldsExtracted, fieldsMissing, lowConfidenceFields } }</code>
+      </div>
+    </div>
+    <div style="border:1px solid #e5e5e5;border-radius:8px;padding:14px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <span style="background:#22C55E;color:#fff;padding:2px 10px;border-radius:4px;font-size:11px;font-weight:700;">POST</span>
+        <code style="font-size:13px;font-weight:600;">/api/report/pdf</code>
+      </div>
+      <div style="font-size:12px;color:#555;line-height:1.8;">
+        입력: <code>{ fields: {...} }</code><br>
+        동작: report.html 플레이스홀더 치환 → Puppeteer PDF 렌더링<br>
+        출력: application/pdf 바이너리
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 데이터 스키마 -->
+<div class="section">
+  <h3>데이터 스키마 (6그룹, 25필드)</h3>
+
+  <!-- Group 1 -->
+  <div style="margin-bottom:14px;">
+    <div style="font-size:12px;font-weight:700;color:#7C3AED;margin-bottom:6px;">1. 기업 기본정보</div>
+    <table style="width:100%;border-collapse:collapse;font-size:11px;">
+      <tr style="background:#f9fafb;"><th style="text-align:left;padding:6px 8px;border-bottom:1px solid #e5e5e5;">필드</th><th style="text-align:left;padding:6px 8px;border-bottom:1px solid #e5e5e5;">키</th><th style="text-align:left;padding:6px 8px;border-bottom:1px solid #e5e5e5;">타입</th><th style="text-align:left;padding:6px 8px;border-bottom:1px solid #e5e5e5;">템플릿 매핑</th></tr>
+      <tr><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">기업명</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;"><code>companyName</code></td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">string</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">{기업명}, {정식 법인명}</td></tr>
+      <tr><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">업종</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;"><code>industry</code></td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">string</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">{예: 제조업 / IT서비스}</td></tr>
+      <tr><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">임직원 수</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;"><code>employees</code></td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">object {total, regular, contract}</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">{N}명</td></tr>
+      <tr><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">연매출</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;"><code>revenue</code></td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">string</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">{10억 미만 / ...}</td></tr>
+      <tr><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">주요 사업</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;"><code>businessDesc</code></td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">string</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">{핵심 사업 서술}</td></tr>
+      <tr><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">고객 유형</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;"><code>customerType</code></td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">string</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">{B2B / B2C / B2G}</td></tr>
+    </table>
+  </div>
+
+  <!-- Group 2 -->
+  <div style="margin-bottom:14px;">
+    <div style="font-size:12px;font-weight:700;color:#F59E0B;margin-bottom:6px;">2. AI 성숙도 진단</div>
+    <table style="width:100%;border-collapse:collapse;font-size:11px;">
+      <tr style="background:#f9fafb;"><th style="text-align:left;padding:6px 8px;border-bottom:1px solid #e5e5e5;">필드</th><th style="text-align:left;padding:6px 8px;border-bottom:1px solid #e5e5e5;">키</th><th style="text-align:left;padding:6px 8px;border-bottom:1px solid #e5e5e5;">타입</th><th style="text-align:left;padding:6px 8px;border-bottom:1px solid #e5e5e5;">설명</th></tr>
+      <tr><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">AI 도입 단계</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;"><code>aiStage</code></td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">number (1-5)</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">현재 단계 판정</td></tr>
+      <tr><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">5개 영역 점수</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;"><code>scores</code></td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">object {strategy, data, process, talent, tech}</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">각 1.0~5.0</td></tr>
+      <tr><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">핵심 문제</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;"><code>coreProblem</code></td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">string</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">Executive Summary용</td></tr>
+      <tr><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">AI 예산</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;"><code>aiBudget</code></td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">object {toolSubscription, educationBudget}</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">월/연 금액</td></tr>
+      <tr><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">AI 전담 인력</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;"><code>aiSpecialists</code></td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">number | null</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">전담 인력 수</td></tr>
+    </table>
+  </div>
+
+  <!-- Group 3 -->
+  <div style="margin-bottom:14px;">
+    <div style="font-size:12px;font-weight:700;color:#3B82F6;margin-bottom:6px;">3. 우선 과제 & 로드맵</div>
+    <table style="width:100%;border-collapse:collapse;font-size:11px;">
+      <tr style="background:#f9fafb;"><th style="text-align:left;padding:6px 8px;border-bottom:1px solid #e5e5e5;">필드</th><th style="text-align:left;padding:6px 8px;border-bottom:1px solid #e5e5e5;">키</th><th style="text-align:left;padding:6px 8px;border-bottom:1px solid #e5e5e5;">타입</th><th style="text-align:left;padding:6px 8px;border-bottom:1px solid #e5e5e5;">설명</th></tr>
+      <tr><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">Top 3 과제</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;"><code>topTasks</code></td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">array [{name, module, urgency}]</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">우선 과제 3건</td></tr>
+      <tr><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">권장 경로</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;"><code>recommendedPath</code></td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">array of strings</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">모듈 순서 ["A","B","C","D"]</td></tr>
+    </table>
+  </div>
+
+  <!-- Group 4 -->
+  <div style="margin-bottom:14px;">
+    <div style="font-size:12px;font-weight:700;color:#22C55E;margin-bottom:6px;">4. SWOT & 환경 분석</div>
+    <table style="width:100%;border-collapse:collapse;font-size:11px;">
+      <tr style="background:#f9fafb;"><th style="text-align:left;padding:6px 8px;border-bottom:1px solid #e5e5e5;">필드</th><th style="text-align:left;padding:6px 8px;border-bottom:1px solid #e5e5e5;">키</th><th style="text-align:left;padding:6px 8px;border-bottom:1px solid #e5e5e5;">타입</th><th style="text-align:left;padding:6px 8px;border-bottom:1px solid #e5e5e5;">설명</th></tr>
+      <tr><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">SWOT</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;"><code>swot</code></td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">object {S, W, O, T}</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">각 3~5개 항목 배열</td></tr>
+      <tr><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">외부 환경</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;"><code>externalEnv</code></td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">object {industryAiRate, competitors, govSupport}</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">업계 현황</td></tr>
+    </table>
+  </div>
+
+  <!-- Group 5 -->
+  <div style="margin-bottom:14px;">
+    <div style="font-size:12px;font-weight:700;color:#EC4899;margin-bottom:6px;">5. AX 전환 범위</div>
+    <table style="width:100%;border-collapse:collapse;font-size:11px;">
+      <tr style="background:#f9fafb;"><th style="text-align:left;padding:6px 8px;border-bottom:1px solid #e5e5e5;">필드</th><th style="text-align:left;padding:6px 8px;border-bottom:1px solid #e5e5e5;">키</th><th style="text-align:left;padding:6px 8px;border-bottom:1px solid #e5e5e5;">타입</th><th style="text-align:left;padding:6px 8px;border-bottom:1px solid #e5e5e5;">설명</th></tr>
+      <tr><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">대상 부서</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;"><code>targetDepts</code></td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">object {phase1, phase2}</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">1차/2차 부서명</td></tr>
+      <tr><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">스폰서</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;"><code>sponsor</code></td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">string</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">대표이사/C-Level</td></tr>
+      <tr><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">목표 KPI</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;"><code>kpis</code></td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">object {automationRate, aiLeaders, costSaving, aiServices}</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">정량 목표</td></tr>
+    </table>
+  </div>
+
+  <!-- Group 6 -->
+  <div style="margin-bottom:14px;">
+    <div style="font-size:12px;font-weight:700;color:#6b7280;margin-bottom:6px;">6. 메타 정보</div>
+    <table style="width:100%;border-collapse:collapse;font-size:11px;">
+      <tr style="background:#f9fafb;"><th style="text-align:left;padding:6px 8px;border-bottom:1px solid #e5e5e5;">필드</th><th style="text-align:left;padding:6px 8px;border-bottom:1px solid #e5e5e5;">키</th><th style="text-align:left;padding:6px 8px;border-bottom:1px solid #e5e5e5;">타입</th><th style="text-align:left;padding:6px 8px;border-bottom:1px solid #e5e5e5;">설명</th></tr>
+      <tr><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">진단일</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;"><code>diagnosisDate</code></td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">string (YYYY.MM.DD)</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">표지용</td></tr>
+      <tr><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">컨설턴트명</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;"><code>consultantName</code></td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">string</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">담당자명</td></tr>
+      <tr><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">인터뷰 정보</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;"><code>interviewInfo</code></td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">object {participants, date}</td><td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;">참석자 수, 일시</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- 프롬프트 전략 -->
+<div class="section">
+  <h3>Claude API 프롬프트 전략</h3>
+  <div style="background:#f3f0ff;border-radius:8px;padding:16px;font-size:12px;line-height:2;color:#555;">
+    <strong>System Prompt:</strong> 역할 정의 + JSON 스키마 + 예시값 + 추출 규칙<br>
+    <strong>추출 규칙:</strong><br>
+    &nbsp;&nbsp;• 노트에 명시된 정보 → 그대로 추출<br>
+    &nbsp;&nbsp;• 노트에 없는 정보 → <code>null</code><br>
+    &nbsp;&nbsp;• 애매한 정보 → 최선 추정 + <code>lowConfidenceFields</code>에 추가<br>
+    &nbsp;&nbsp;• 점수(1.0~5.0) → 노트 기반 판단, 근거 부족 시 low confidence<br>
+    <strong>응답 형식:</strong> tool_use (structured output)로 JSON 보장
+  </div>
+</div>
+
+<!-- 상태 관리 -->
+<div class="section">
+  <h3>상태 관리</h3>
+  <div style="background:#f9fafb;border-radius:8px;padding:16px;font-size:12px;line-height:1.8;">
+    React Context (<code>ReportContext</code>)로 페이지 간 전달. DB 없음.<br>
+    • <code>meetingNotes: string</code> — 원본 미팅 노트<br>
+    • <code>fields: ReportFields</code> — 추출/수정된 필드<br>
+    • <code>metadata: ExtractMetadata</code> — missing/low confidence 정보
+  </div>
+</div>
+
+<!-- 에러 처리 -->
+<div class="section">
+  <h3>에러 처리</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;">
+    <div style="background:#fef2f2;border-radius:6px;padding:10px;"><strong>Claude API 실패:</strong> 에러 메시지 + 재시도</div>
+    <div style="background:#fef2f2;border-radius:6px;padding:10px;"><strong>PDF 생성 실패:</strong> 에러 메시지 + 재시도</div>
+    <div style="background:#fef9c3;border-radius:6px;padding:10px;"><strong>빈 노트:</strong> 버튼 비활성화</div>
+    <div style="background:#fef9c3;border-radius:6px;padding:10px;"><strong>필수 필드 누락:</strong> 경고 (생성은 허용)</div>
+  </div>
+</div>
+
+<!-- 파일 구조 -->
+<div class="section">
+  <h3>파일 구조</h3>
+  <div style="background:#1a1a2e;color:#e0e0e0;border-radius:8px;padding:16px;font-size:12px;line-height:2;font-family:monospace;">
+    <span style="color:#888;">src/app/</span><br>
+    ├── <span style="color:#7C3AED;">report/</span><br>
+    │&nbsp;&nbsp;&nbsp;├── page.tsx <span style="color:#888;"># 미팅 노트 입력</span><br>
+    │&nbsp;&nbsp;&nbsp;├── <span style="color:#F59E0B;">review/</span>page.tsx <span style="color:#888;"># 리뷰 & 수정</span><br>
+    │&nbsp;&nbsp;&nbsp;└── <span style="color:#22C55E;">preview/</span>page.tsx <span style="color:#888;"># 미리보기 & PDF</span><br>
+    ├── <span style="color:#3B82F6;">api/report/</span><br>
+    │&nbsp;&nbsp;&nbsp;├── analyze/route.ts <span style="color:#888;"># Claude API</span><br>
+    │&nbsp;&nbsp;&nbsp;└── pdf/route.ts <span style="color:#888;"># Puppeteer PDF</span><br>
+    ├── context/ReportContext.tsx<br>
+    └── <span style="color:#EC4899;">lib/</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;├── report-schema.ts<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;├── template-engine.ts<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;└── claude-prompt.ts
+  </div>
+</div>
+
+<!-- 범위 외 -->
+<div style="margin-top:16px;padding:12px 16px;background:#f9fafb;border-radius:8px;border:1px solid #e5e5e5;font-size:12px;color:#888;">
+  <strong>범위 외 (YAGNI):</strong> 인증/로그인 · 리포트 저장/히스토리 · 실시간 협업 · 다국어 · Figma 연동
+</div>

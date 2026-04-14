@@ -10,14 +10,10 @@ import {
   validateField,
   getDependentFields,
   type ExtractionMethod,
-  type ValidationError,
 } from '@/lib/field-extraction-config';
 import {
-  SURVEY_QUESTIONS,
-  SURVEY_PARTS,
   FIELD_TO_SURVEY_MAP,
   analyzeSurveyGaps,
-  type SurveyGapResult,
 } from '@/lib/question-guide';
 
 const METHOD_BADGE: Record<ExtractionMethod, { bg: string; text: string; label: string }> = {
@@ -51,29 +47,6 @@ function GuidanceTooltip({ fieldKey, show, onClose }: { fieldKey: string; show: 
       </div>
     </div>
   );
-}
-
-// 리포트 페이지 → 리뷰 필드 그룹 매핑
-const REPORT_PAGE_TO_GROUP: Record<string, string> = {
-  'P1': '표지 메타 정보', 'P2': '표지 메타 정보',
-  'P3': '기업 기본정보', 'P4': 'AI 성숙도 진단', 'P4 지표1': 'AI 성숙도 진단',
-  'P4 지표2': 'AI 성숙도 진단', 'P4 지표3': 'AI 성숙도 진단', 'P4 지표4': 'AI 성숙도 진단',
-  'P4 지표5': 'AI 성숙도 진단',
-  'P5': '업무 프로세스 분석', 'P6': '내부 역량 진단',
-  'P7': 'SWOT & 환경 분석', 'P8': 'Gap 분석',
-  'P9': 'AX 전환 범위', 'P10': 'AX 혁신 과제',
-  'P11': '세부 추진 계획', 'P12': '세부 추진 계획',
-  'P13': '세부 추진 계획', 'P14': 'SWOT 교차 전략',
-  'P15': '우선 과제 & 로드맵',
-};
-
-function getReviewGroupNames(reportSections: string[]): string[] {
-  const groups = new Set<string>();
-  for (const sec of reportSections) {
-    const g = REPORT_PAGE_TO_GROUP[sec];
-    if (g) groups.add(g);
-  }
-  return Array.from(groups);
 }
 
 export default function ReviewPage() {

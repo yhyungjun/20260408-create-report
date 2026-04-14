@@ -4,9 +4,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useReport } from '@/context/ReportContext';
 import {
-  SURVEY_QUESTIONS, SURVEY_PARTS, ONLINE_MEETING_GUIDE, MEETING_PHASES,
+  SURVEY_QUESTIONS, SURVEY_PARTS, ONLINE_MEETING_GUIDE,
   getMeetingFollowUps, analyzeSurveyGaps, getRelevantMeetingQuestions,
-  renderQuestionText, getSurveyQuestion, type SurveyGapResult,
+  renderQuestionText, getSurveyQuestion,
 } from '@/lib/question-guide';
 import { parseSurveyAnswers, remapFormIds } from '@/lib/survey-mapping';
 

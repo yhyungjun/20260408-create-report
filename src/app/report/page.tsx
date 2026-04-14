@@ -61,7 +61,7 @@ interface SurveyInfo {
 
 export default function ReportInputPage() {
   const router = useRouter();
-  const { meetingNotes, setMeetingNotes, setFields, setMetadata, setSurveyAnswers, reportId, setReportId, savedReports, setSavedReports, loadReports } = useReport();
+  const { meetingNotes, setMeetingNotes, setFields, setMetadata, setSurveyAnswers, reportId, setReportId, savedReports, setSavedReports } = useReport();
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState('');
   const [error, setError] = useState('');
