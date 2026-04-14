@@ -51,32 +51,32 @@ function CompanyOptionsPanel({ companyName, isCompleted, onSelect, onClose }: {
 }) {
   return (
     <div className="fixed left-[320px] top-0 h-full w-[240px] bg-white border-r border-gray-200 z-[60] flex flex-col shadow-lg">
-      <div className="flex items-center justify-between px-3 py-3 border-b border-gray-200 bg-gray-50">
-        <div className="text-xs font-semibold text-gray-900 truncate">{companyName}</div>
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-purple-50">
+        <div className="text-sm font-bold text-purple-900 truncate">{companyName}</div>
         <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-sm leading-none">✕</button>
       </div>
-      <div className="p-3 space-y-2">
+      <div className="p-4 space-y-3">
         <button
           onClick={() => onSelect('guide')}
-          className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-colors group"
+          className="w-full text-left p-4 rounded-lg border-2 border-purple-200 hover:border-purple-400 hover:bg-purple-50 transition-colors group"
         >
-          <div className="text-xs font-semibold text-gray-900 group-hover:text-purple-700">미팅 가이드</div>
-          <div className="text-[10px] text-gray-500 mt-0.5">갭 분석 기반 질문 가이드</div>
+          <div className="text-sm font-bold text-purple-700">미팅 가이드</div>
+          <div className="text-xs text-gray-500 mt-1">갭 분석 기반 질문 가이드</div>
         </button>
         <button
           onClick={() => onSelect('survey')}
-          className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-colors group"
+          className="w-full text-left p-4 rounded-lg border-2 border-blue-200 hover:border-blue-400 hover:bg-blue-50 transition-colors group"
         >
-          <div className="text-xs font-semibold text-gray-900 group-hover:text-purple-700">설문 응답</div>
-          <div className="text-[10px] text-gray-500 mt-0.5">Part별 설문 응답 확인</div>
+          <div className="text-sm font-bold text-blue-700">설문 응답</div>
+          <div className="text-xs text-gray-500 mt-1">Part별 설문 응답 확인</div>
         </button>
         {isCompleted && (
           <button
             onClick={() => onSelect('report')}
-            className="w-full text-left p-3 rounded-lg border border-green-200 hover:border-green-400 hover:bg-green-50 transition-colors group"
+            className="w-full text-left p-4 rounded-lg border-2 border-green-200 hover:border-green-400 hover:bg-green-50 transition-colors group"
           >
-            <div className="text-xs font-semibold text-gray-900 group-hover:text-green-700">이전 리포트</div>
-            <div className="text-[10px] text-gray-500 mt-0.5">리뷰에서 생성된 리포트 데이터 확인</div>
+            <div className="text-sm font-bold text-green-700">이전 리포트</div>
+            <div className="text-xs text-gray-500 mt-1">리뷰에서 생성된 리포트 데이터 확인</div>
           </button>
         )}
       </div>
@@ -462,10 +462,10 @@ export default function GlobalSidebar() {
     return (
       <button
         onClick={() => setGlobalSidebarOpen(true)}
-        className="fixed left-0 top-1/2 -translate-y-1/2 z-[60] bg-white border border-gray-200 border-l-0 rounded-r-lg px-1.5 py-3 shadow-md hover:bg-gray-50 transition-colors"
+        className="fixed left-0 top-1/2 -translate-y-1/2 z-[60] bg-purple-600 border border-purple-700 border-l-0 rounded-r-xl px-2.5 py-5 shadow-lg hover:bg-purple-700 transition-colors"
         title="사이드바 열기"
       >
-        <span className="text-xs text-gray-500 [writing-mode:vertical-lr]">리포트</span>
+        <span className="text-sm font-bold text-white [writing-mode:vertical-lr] tracking-widest">리포트</span>
       </button>
     );
   }
@@ -550,9 +550,9 @@ export default function GlobalSidebar() {
                       </div>
                     ) : (
                       <div className="flex items-center">
-                        <button onClick={() => handleLoadReport(r.id)} className="flex-1 text-left p-2.5 min-w-0">
-                          <div className="text-xs font-medium text-gray-900 truncate">{r.title}</div>
-                          <div className="text-[10px] text-gray-500 mt-0.5 flex gap-2">
+                        <button onClick={() => handleLoadReport(r.id)} className="flex-1 text-left p-3 min-w-0">
+                          <div className="text-sm font-semibold text-gray-900 truncate">{r.title}</div>
+                          <div className="text-xs text-gray-500 mt-1 flex gap-2">
                             {r.fields?.industry && <span>{r.fields.industry}</span>}
                             <span>{new Date(r.created_at).toLocaleDateString('ko-KR')}</span>
                           </div>
@@ -598,7 +598,7 @@ export default function GlobalSidebar() {
                       {pendingCompanies.map(({ name, idx }) => (
                         <button key={idx} onClick={() => handleSelectCompany(idx)} className={`w-full text-left p-2.5 border-b border-gray-100 transition-colors ${selectedCompanyIdx === idx ? 'bg-purple-50' : 'hover:bg-gray-50'}`}>
                           <div className="flex items-center justify-between">
-                            <span className="text-xs font-medium text-gray-900">{name}</span>
+                            <span className="text-sm font-semibold text-gray-900">{name}</span>
                             {selectedCompanyIdx === idx && <span className="text-[10px] text-purple-600">보는 중</span>}
                           </div>
                         </button>
@@ -611,7 +611,7 @@ export default function GlobalSidebar() {
                       {completedCompanies.map(({ name, idx }) => (
                         <button key={idx} onClick={() => handleSelectCompany(idx)} className={`w-full text-left p-2.5 border-b border-gray-100 transition-colors ${selectedCompanyIdx === idx ? 'bg-purple-50' : 'hover:bg-gray-50'}`}>
                           <div className="flex items-center justify-between">
-                            <span className="text-xs font-medium text-gray-900">{name}</span>
+                            <span className="text-sm font-semibold text-gray-900">{name}</span>
                             <div className="flex items-center gap-1.5">
                               {selectedCompanyIdx === idx && <span className="text-[10px] text-purple-600">보는 중</span>}
                               <span className="text-[10px] px-1.5 py-0.5 bg-green-100 text-green-700 rounded">완료</span>
