@@ -1,7 +1,13 @@
 'use client';
 
 import { ReportProvider } from '@/context/ReportContext';
+import GlobalSidebar from '@/components/GlobalSidebar';
 
 export default function ReportLayout({ children }: { children: React.ReactNode }) {
-  return <ReportProvider>{children}</ReportProvider>;
+  return (
+    <ReportProvider>
+      <GlobalSidebar />
+      {children}
+    </ReportProvider>
+  );
 }

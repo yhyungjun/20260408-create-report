@@ -61,14 +61,12 @@ interface SurveyInfo {
 
 export default function ReportInputPage() {
   const router = useRouter();
-  const { meetingNotes, setMeetingNotes, setFields, setMetadata, reportId, setReportId } = useReport();
+  const { meetingNotes, setMeetingNotes, setFields, setMetadata, setSurveyAnswers, reportId, setReportId, savedReports, setSavedReports, loadReports } = useReport();
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState('');
   const [error, setError] = useState('');
 
-  // 이전 리포트 목록
-  const [savedReports, setSavedReports] = useState<{ id: string; title: string; company_name: string | null; created_at: string; fields: { industry?: string | null; diagnosisDate?: string | null } | null }[]>([]);
-  const [reportsLoading, setReportsLoading] = useState(true);
+  const reportsLoading = savedReports.length === 0;
 
   // 노트 파일 상태 (textarea의 수동 입력과 별개로 관리)
   const [noteFiles, setNoteFiles] = useState<NoteFile[]>([]);
@@ -89,23 +87,7 @@ export default function ReportInputPage() {
   const [sheetsUrl, setSheetsUrl] = useState('');
   const [sheetsFetching, setSheetsFetching] = useState(false);
 
-  // ── 이전 리포트 목록 로드 (마운트 + 페이지 포커스 시) ──
-  const loadReports = useCallback(async () => {
-    try {
-      const res = await fetch('/api/report/db', { cache: 'no-store' });
-      if (!res.ok) return;
-      const { reports } = await res.json();
-      setSavedReports(reports);
-    } catch { /* 무시 */ }
-    finally { setReportsLoading(false); }
-  }, []);
-
-  useEffect(() => {
-    loadReports();
-    const onFocus = () => loadReports();
-    window.addEventListener('focus', onFocus);
-    return () => window.removeEventListener('focus', onFocus);
-  }, [loadReports]);
+  // 리포트 목록은 GlobalSidebar/ReportContext에서 로드됨
 
   const handleLoadReport = useCallback(async (id: string) => {
     setLoading(true);
@@ -287,6 +269,8 @@ export default function ReportInputPage() {
           // 설문 응답 파싱 → 구글폼 ID 리매핑 → 구조화
           const rawAnswers = parseSurveyAnswers(surveyInfo.headers, row);
           const answers = remapFormIds(rawAnswers);
+          // 설문 응답을 context에 저장 (리뷰 페이지 사이드바용)
+          setSurveyAnswers(answers);
           // Track 1: 직접 매핑 가능한 필드 pre-fill
           surveyFields = prefillFieldsFromSurvey(answers);
           // Track 1.5: 파생 계산 (복수 질문 조합 → 중간 지표)

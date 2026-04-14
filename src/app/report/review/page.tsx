@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useCallback, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useReport } from '@/context/ReportContext';
 import { FIELD_GROUPS, type FieldDef } from '@/lib/report-schema';
@@ -12,6 +12,13 @@ import {
   type ExtractionMethod,
   type ValidationError,
 } from '@/lib/field-extraction-config';
+import {
+  SURVEY_QUESTIONS,
+  SURVEY_PARTS,
+  FIELD_TO_SURVEY_MAP,
+  analyzeSurveyGaps,
+  type SurveyGapResult,
+} from '@/lib/question-guide';
 
 const METHOD_BADGE: Record<ExtractionMethod, { bg: string; text: string; label: string }> = {
   '직접추출': { bg: 'bg-green-100', text: 'text-green-700', label: '직접추출' },
@@ -46,14 +53,41 @@ function GuidanceTooltip({ fieldKey, show, onClose }: { fieldKey: string; show: 
   );
 }
 
+// 리포트 페이지 → 리뷰 필드 그룹 매핑
+const REPORT_PAGE_TO_GROUP: Record<string, string> = {
+  'P1': '표지 메타 정보', 'P2': '표지 메타 정보',
+  'P3': '기업 기본정보', 'P4': 'AI 성숙도 진단', 'P4 지표1': 'AI 성숙도 진단',
+  'P4 지표2': 'AI 성숙도 진단', 'P4 지표3': 'AI 성숙도 진단', 'P4 지표4': 'AI 성숙도 진단',
+  'P4 지표5': 'AI 성숙도 진단',
+  'P5': '업무 프로세스 분석', 'P6': '내부 역량 진단',
+  'P7': 'SWOT & 환경 분석', 'P8': 'Gap 분석',
+  'P9': 'AX 전환 범위', 'P10': 'AX 혁신 과제',
+  'P11': '세부 추진 계획', 'P12': '세부 추진 계획',
+  'P13': '세부 추진 계획', 'P14': 'SWOT 교차 전략',
+  'P15': '우선 과제 & 로드맵',
+};
+
+function getReviewGroupNames(reportSections: string[]): string[] {
+  const groups = new Set<string>();
+  for (const sec of reportSections) {
+    const g = REPORT_PAGE_TO_GROUP[sec];
+    if (g) groups.add(g);
+  }
+  return Array.from(groups);
+}
+
 export default function ReviewPage() {
   const router = useRouter();
-  const { fields, setFields, metadata, ready, reportId, reportTitle, setReportTitle } = useReport();
+  const { fields, setFields, metadata, ready, reportId, reportTitle, setReportTitle, surveyAnswers } = useReport();
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [dependencyWarnings, setDependencyWarnings] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
+  const surveyGaps = useMemo(() => {
+    if (!surveyAnswers) return [];
+    return analyzeSurveyGaps(surveyAnswers);
+  }, [surveyAnswers]);
 
   const handleSave = useCallback(async () => {
     if (!fields || !reportId) return;
@@ -386,57 +420,74 @@ export default function ReviewPage() {
       </div>
 
       <div className="max-w-3xl mx-auto px-4 py-8">
-        {/* 리포트 제목 */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
-          <label className="text-xs font-semibold text-gray-500 mb-1 block">리포트 제목</label>
-          <input
-            type="text"
-            value={reportTitle}
-            onChange={(e) => setReportTitle(e.target.value)}
-            placeholder={fields?.companyName ? `${fields.companyName} - ${fields.diagnosisDate || new Date().toISOString().slice(0, 10)}` : '제목을 입력하세요'}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-          />
-        </div>
+          {/* 리포트 제목 */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
+            <label className="text-xs font-semibold text-gray-500 mb-1 block">리포트 제목</label>
+            <input
+              type="text"
+              value={reportTitle}
+              onChange={(e) => setReportTitle(e.target.value)}
+              placeholder={fields?.companyName ? `${fields.companyName} - ${fields.diagnosisDate || new Date().toISOString().slice(0, 10)}` : '제목을 입력하세요'}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            />
+          </div>
 
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-xl font-bold text-gray-900 mb-2">리뷰 & 수정</h1>
-          <p className="text-gray-500 text-sm">AI가 추출한 값을 확인하고 수정하세요</p>
-          {metadata && (
-            <div className="mt-4 flex items-center justify-center gap-4 text-xs">
-              <span className="px-2 py-1 bg-green-50 text-green-700 rounded">추출됨: {metadata.fieldsExtracted}</span>
-              {badges.emptyCount > 0 && (
-                <button
-                  onClick={scrollToFirstEmpty}
-                  className="px-2 py-1 bg-yellow-50 text-yellow-700 rounded hover:bg-yellow-100 transition-colors cursor-pointer"
-                >미입력: {badges.emptyCount}</button>
-              )}
-              {badges.lowConfCount > 0 && (
-                <button
-                  onClick={scrollToFirstLowConfidence}
-                  className="px-2 py-1 bg-orange-50 text-orange-700 rounded hover:bg-orange-100 transition-colors cursor-pointer"
-                >확인 필요: {badges.lowConfCount}</button>
-              )}
-            </div>
-          )}
-        </div>
+          {/* Header */}
+          <div className="text-center mb-8">
+            <h1 className="text-xl font-bold text-gray-900 mb-2">리뷰 & 수정</h1>
+            <p className="text-gray-500 text-sm">AI가 추출한 값을 확인하고 수정하세요</p>
+            {metadata && (
+              <div className="mt-4 flex items-center justify-center gap-4 text-xs">
+                <span className="px-2 py-1 bg-green-50 text-green-700 rounded">추출됨: {metadata.fieldsExtracted}</span>
+                {badges.emptyCount > 0 && (
+                  <button
+                    onClick={scrollToFirstEmpty}
+                    className="px-2 py-1 bg-yellow-50 text-yellow-700 rounded hover:bg-yellow-100 transition-colors cursor-pointer"
+                  >미입력: {badges.emptyCount}</button>
+                )}
+                {badges.lowConfCount > 0 && (
+                  <button
+                    onClick={scrollToFirstLowConfidence}
+                    className="px-2 py-1 bg-orange-50 text-orange-700 rounded hover:bg-orange-100 transition-colors cursor-pointer"
+                  >확인 필요: {badges.lowConfCount}</button>
+                )}
+              </div>
+            )}
+          </div>
 
-        {/* Form */}
-        <div className="space-y-6">
-          {FIELD_GROUPS.map((group) => (
-            <div
-              key={group.name}
-              className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
-            >
-              <div className="px-6 py-3 border-b" style={{ borderLeftWidth: 4, borderLeftColor: group.color }}>
-                <h2 className="font-semibold text-black">{group.name}</h2>
+          {/* Form */}
+          <div className="space-y-6">
+            {FIELD_GROUPS.map((group) => (
+              <div
+                key={group.name}
+                className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
+              >
+                <div className="px-6 py-3 border-b" style={{ borderLeftWidth: 4, borderLeftColor: group.color }}>
+                  <h2 className="font-semibold text-black">{group.name}</h2>
+                  {surveyAnswers && FIELD_TO_SURVEY_MAP[group.name] && (
+                    <div className="flex flex-wrap gap-1 mt-1.5">
+                      {FIELD_TO_SURVEY_MAP[group.name].map(id => {
+                        const gap = surveyGaps.find(g => g.id === id);
+                        const status = gap?.status || 'missing';
+                        return (
+                          <span key={id} className={`text-[10px] px-1 py-0.5 rounded ${
+                            status === 'answered' ? 'bg-green-100 text-green-700' :
+                            status === 'unclear' ? 'bg-yellow-100 text-yellow-700' :
+                            'bg-red-100 text-red-700'
+                          }`}>
+                            {id}{status === 'answered' ? '✅' : status === 'unclear' ? '⚠️' : '❌'}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+                <div className="p-6">
+                  {group.fields.map((field) => renderField(field))}
+                </div>
               </div>
-              <div className="p-6">
-                {group.fields.map((field) => renderField(field))}
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
       </div>
     </div>
   );

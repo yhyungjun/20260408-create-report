@@ -8,7 +8,10 @@ export async function GET(req: Request) {
   try {
     if (action === 'list') {
       const data = await listNotes();
-      const notes = data.items.map((n) => ({
+      const filtered = data.items.filter((n) =>
+        n.tags.some((t) => t.name.includes('사전진단컨설팅'))
+      );
+      const notes = filtered.map((n) => ({
         id: n.id,
         title: n.title,
         createdAt: n.createdAt,
