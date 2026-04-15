@@ -418,7 +418,12 @@ export default function GlobalSidebar() {
         if (report.metadata) setMetadata(report.metadata);
         router.push('/report/review');
       }
+      // 사이드바 및 Level 2/3 패널 전체 리셋 (겹침 방지)
       setGlobalSidebarOpen(false);
+      setExpandedSection(null);
+      setSelectedCompanyIdx(null);
+      setSelectedAnswers(null);
+      setLevel3View(null);
     } catch {}
   }, [setReportId, setReportTitle, setMeetingNotes, setFields, setMetadata, router, setGlobalSidebarOpen]);
 

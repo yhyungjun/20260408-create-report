@@ -6,6 +6,8 @@ import type { ReportFields, ExtractMetadata } from '@/lib/report-schema';
 const STORAGE_KEY_FIELDS = 'report_fields';
 const STORAGE_KEY_METADATA = 'report_metadata';
 const STORAGE_KEY_SURVEY = 'report_survey_answers';
+const STORAGE_KEY_REPORT_ID = 'report_id';
+const STORAGE_KEY_REPORT_TITLE = 'report_title';
 
 function saveToStorage(key: string, value: unknown) {
   try {
@@ -70,8 +72,8 @@ export function ReportProvider({ children }: { children: ReactNode }) {
   const [fields, setFieldsRaw] = useState<ReportFields | null>(null);
   const [metadata, setMetadataRaw] = useState<ExtractMetadata | null>(null);
   const [surveyAnswers, setSurveyAnswersRaw] = useState<Record<string, string> | null>(null);
-  const [reportId, setReportId] = useState<string | null>(null);
-  const [reportTitle, setReportTitle] = useState('');
+  const [reportId, setReportIdRaw] = useState<string | null>(null);
+  const [reportTitle, setReportTitleRaw] = useState('');
   const [savedReports, setSavedReports] = useState<SavedReport[]>([]);
   const [globalSurveyInfo, setGlobalSurveyInfo] = useState<GlobalSurveyInfo | null>(null);
   const [globalSidebarOpen, setGlobalSidebarOpen] = useState(false);
@@ -83,6 +85,8 @@ export function ReportProvider({ children }: { children: ReactNode }) {
     setFieldsRaw(readStorage(STORAGE_KEY_FIELDS));
     setMetadataRaw(readStorage(STORAGE_KEY_METADATA));
     setSurveyAnswersRaw(readStorage(STORAGE_KEY_SURVEY));
+    setReportIdRaw(readStorage<string>(STORAGE_KEY_REPORT_ID));
+    setReportTitleRaw(readStorage<string>(STORAGE_KEY_REPORT_TITLE) ?? '');
     setReady(true);
   }, []);
   /* eslint-enable react-hooks/set-state-in-effect */
@@ -102,6 +106,16 @@ export function ReportProvider({ children }: { children: ReactNode }) {
     saveToStorage(STORAGE_KEY_SURVEY, a);
   }, []);
 
+  const setReportId = useCallback((id: string | null) => {
+    setReportIdRaw(id);
+    saveToStorage(STORAGE_KEY_REPORT_ID, id);
+  }, []);
+
+  const setReportTitle = useCallback((title: string) => {
+    setReportTitleRaw(title);
+    saveToStorage(STORAGE_KEY_REPORT_TITLE, title || null);
+  }, []);
+
   const loadReports = useCallback(async () => {
     try {
       const res = await fetch('/api/report/db', { cache: 'no-store' });
@@ -115,12 +129,14 @@ export function ReportProvider({ children }: { children: ReactNode }) {
     setMeetingNotes('');
     setFieldsRaw(null);
     setMetadataRaw(null);
-    setReportId(null);
-    setReportTitle('');
+    setReportIdRaw(null);
+    setReportTitleRaw('');
     setSurveyAnswersRaw(null);
     saveToStorage(STORAGE_KEY_FIELDS, null);
     saveToStorage(STORAGE_KEY_METADATA, null);
     saveToStorage(STORAGE_KEY_SURVEY, null);
+    saveToStorage(STORAGE_KEY_REPORT_ID, null);
+    saveToStorage(STORAGE_KEY_REPORT_TITLE, null);
   };
 
   return (

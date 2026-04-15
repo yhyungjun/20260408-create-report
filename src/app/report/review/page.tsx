@@ -51,7 +51,7 @@ function GuidanceTooltip({ fieldKey, show, onClose }: { fieldKey: string; show: 
 
 export default function ReviewPage() {
   const router = useRouter();
-  const { fields, setFields, metadata, ready, reportId, reportTitle, setReportTitle, surveyAnswers } = useReport();
+  const { fields, setFields, metadata, ready, reportId, setReportId, reportTitle, setReportTitle, surveyAnswers } = useReport();
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [dependencyWarnings, setDependencyWarnings] = useState<string[]>([]);
@@ -63,28 +63,49 @@ export default function ReviewPage() {
   }, [surveyAnswers]);
 
   const handleSave = useCallback(async () => {
-    if (!fields || !reportId) return;
+    if (!fields) {
+      setSaveMsg('저장할 데이터가 없습니다');
+      setTimeout(() => setSaveMsg(''), 3000);
+      return;
+    }
     setSaving(true);
     setSaveMsg('');
     try {
-      const res = await fetch(`/api/report/db?id=${reportId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: reportTitle || `${fields?.companyName || '미정'} - ${fields?.diagnosisDate || new Date().toISOString().slice(0, 10)}`,
-          fields,
-          metadata,
-        }),
-      });
+      const title = reportTitle || `${fields?.companyName || '미정'} - ${fields?.diagnosisDate || new Date().toISOString().slice(0, 10)}`;
+      const body = {
+        title,
+        company_name: fields?.companyName || null,
+        fields,
+        metadata,
+      };
+      let res: Response;
+      if (reportId) {
+        res = await fetch(`/api/report/db?id=${reportId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+      } else {
+        res = await fetch('/api/report/db', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        if (res.ok) {
+          const { report: saved } = await res.json();
+          if (saved?.id) setReportId(saved.id);
+        }
+      }
       if (!res.ok) throw new Error('저장 실패');
       setSaveMsg('저장 완료');
       setTimeout(() => setSaveMsg(''), 3000);
     } catch {
       setSaveMsg('저장 실패');
+      setTimeout(() => setSaveMsg(''), 3000);
     } finally {
       setSaving(false);
     }
-  }, [fields, metadata, reportId, reportTitle]);
+  }, [fields, metadata, reportId, reportTitle, setReportId]);
 
   useEffect(() => {
     if (ready && !fields) router.replace('/report');
