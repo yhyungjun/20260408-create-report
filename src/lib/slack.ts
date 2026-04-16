@@ -1,6 +1,8 @@
 import { WebClient } from '@slack/web-api';
 
-const slack = new WebClient(process.env.SLACK_BOT_TOKEN);
+function getSlack() {
+  return new WebClient(process.env.SLACK_BOT_TOKEN);
+}
 const CHANNEL_ID = process.env.SLACK_CHANNEL_ID || '';
 
 /** 새 결제 알림 */
@@ -10,7 +12,7 @@ export async function notifyNewPayment(
   contactEmail: string,
 ) {
   if (!CHANNEL_ID) return;
-  await slack.chat.postMessage({
+  await getSlack().chat.postMessage({
     channel: CHANNEL_ID,
     text: `새 결제가 접수되었습니다: ${companyName}`,
     blocks: [
@@ -31,7 +33,7 @@ export async function notifyQuestionnaireComplete(
   contactEmail: string,
 ) {
   if (!CHANNEL_ID) return;
-  await slack.chat.postMessage({
+  await getSlack().chat.postMessage({
     channel: CHANNEL_ID,
     text: `설문이 완료되었습니다: ${companyName}`,
     blocks: [
@@ -53,7 +55,7 @@ export async function sharePdfToSlack(
   contactEmail: string,
 ) {
   if (!CHANNEL_ID) return;
-  await slack.filesUploadV2({
+  await getSlack().filesUploadV2({
     channel_id: CHANNEL_ID,
     file: pdfBuffer,
     filename: `${companyName}_사전기업진단리포트.pdf`,

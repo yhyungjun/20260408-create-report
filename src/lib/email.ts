@@ -1,6 +1,8 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY || '');
+}
 const EMAIL_FROM = process.env.EMAIL_FROM || '조코딩 AX 파트너스 <noreply@jocodingax.ai>';
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://ax.jocodingax.ai';
 
@@ -12,7 +14,7 @@ export async function sendPaymentConfirmEmail(
 ) {
   const questionnaireUrl = `${BASE_URL}/questionnaire/${questionnaireToken}`;
 
-  await resend.emails.send({
+  await getResend().emails.send({
     from: EMAIL_FROM,
     to,
     subject: `[조코딩 AX 파트너스] ${companyName} 사전 기업 진단 - 결제가 완료되었습니다`,
@@ -49,7 +51,7 @@ export async function sendQuestionnaireCompleteEmail(
   to: string,
   companyName: string,
 ) {
-  await resend.emails.send({
+  await getResend().emails.send({
     from: EMAIL_FROM,
     to,
     subject: `[조코딩 AX 파트너스] ${companyName} 사전 진단 설문이 접수되었습니다`,
