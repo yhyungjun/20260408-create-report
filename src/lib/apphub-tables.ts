@@ -8,12 +8,11 @@ const APPHUB_API_KEY = process.env.APPHUB_API_KEY || process.env.APPHUB_APP_KEY 
 const APP_ID = '10';
 const DB_SCHEMA = process.env.APPHUB_DB_SCHEMA || 'jocodingax_ai_app_2_2';
 
-// 테이블 ID 상수 — AppHub 대시보드에서 테이블 생성 후 할당
 export const TABLE_IDS = {
-  reports: '36',       // 기존 리포트 테이블
-  payments: '37',      // TODO: 실제 TABLE_ID로 교체
-  pipelines: '38',     // TODO: 실제 TABLE_ID로 교체
-  questionnaires: '39', // TODO: 실제 TABLE_ID로 교체
+  reports: '36',
+  payments: '40',
+  pipelines: '41',
+  questionnaires: '42',
 } as const;
 
 export type TableName = keyof typeof TABLE_IDS;
