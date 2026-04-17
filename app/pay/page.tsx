@@ -130,6 +130,7 @@ export default function PayPage() {
                 <li>맞춤 진단 결과 이메일 전달 (PDF)</li>
               </ul>
               <p><strong>서비스 제공 절차:</strong> 결제 완료 → 사전 설문 작성 → 컨설턴트 1:1 미팅 → 진단 리포트 이메일 전달</p>
+              <p><strong>서비스 제공 기간:</strong> 결제일로부터 30일 이내</p>
             </div>
           </div>
 
@@ -243,6 +244,40 @@ export default function PayPage() {
           </div>
         </section>
       </main>
+
+      {/* FAQ */}
+      <section className="max-w-4xl mx-auto px-6 py-10">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">자주 묻는 질문</h2>
+        <div className="space-y-4">
+          {[
+            {
+              q: '설문은 어떤 용도인가요?',
+              a: '미팅 시 정밀한 진단을 하기 위함이며, 객관식 중심으로 약 20분 소요됩니다.',
+            },
+            {
+              q: '어떤 규모의 기업이 대상인가요?',
+              a: 'AI 도입을 검토 중인 스타트업부터 중견기업까지 모든 규모가 대상입니다.',
+            },
+            {
+              q: '미팅은 어떻게 진행되나요?',
+              a: '화상 미팅으로 진행되며, 전문 컨설턴트와 약 60분 상담합니다.',
+            },
+            {
+              q: '리포트는 언제 받나요?',
+              a: '설문 + 미팅 완료 후, 영업일 기준 일주일 이내 이메일로 전달됩니다.',
+            },
+            {
+              q: '진단 리포트에는 어떤 내용이 포함되나요?',
+              a: 'AI 성숙도 진단, SWOT 분석, Gap 분석, 혁신 과제 우선순위, 실행 로드맵이 포함된 8페이지 리포트입니다.',
+            },
+          ].map((item) => (
+            <div key={item.q} className="bg-white rounded-xl border border-gray-200 p-5">
+              <p className="font-medium text-gray-900">Q. {item.q}</p>
+              <p className="text-sm text-gray-600 mt-1">A. {item.a}</p>
+            </div>
+          ))}
+        </div>
+      </section>
 
       {/* 사업자 정보 푸터 */}
       <footer className="bg-gray-100 border-t border-gray-200 mt-10">

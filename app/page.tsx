@@ -18,9 +18,9 @@ export default async function LandingPage() {
             <Image
               src="/images/logo.png"
               alt="조코딩 AX 파트너스"
-              width={160}
-              height={40}
-              className="h-8 w-auto"
+              width={200}
+              height={50}
+              className="h-10 w-auto"
               priority
             />
           </Link>
@@ -34,7 +34,7 @@ export default async function LandingPage() {
           AI 기반<br />사전 기업 진단 컨설팅
         </h1>
         <p className="text-lg text-gray-500 mb-8 max-w-xl mx-auto">
-          AI가 기업의 디지털 전환 준비도를 진단하고,
+          AI가 기업의 디지털 전환 준비도를 진단하고,<br />
           맞춤형 AX(AI Transformation) 전략을 제안합니다.
         </p>
         <Link
@@ -43,7 +43,6 @@ export default async function LandingPage() {
         >
           시작하기
         </Link>
-        <p className="text-sm text-gray-400 mt-3">440,000원 (VAT 포함)</p>
       </section>
 
       {/* 진행 절차 */}
@@ -55,7 +54,7 @@ export default async function LandingPage() {
               {
                 step: '01',
                 title: '결제',
-                desc: '온라인 결제로 간편하게 시작합니다.',
+                desc: '온라인 결제로\n간편하게 시작합니다.',
               },
               {
                 step: '02',
@@ -65,12 +64,12 @@ export default async function LandingPage() {
               {
                 step: '03',
                 title: '1:1 미팅',
-                desc: '컨설턴트와 화상 미팅으로 심층 진단합니다.',
+                desc: '컨설턴트와 화상 미팅으로\n심층 진단합니다.',
               },
               {
                 step: '04',
                 title: '리포트 전달',
-                desc: 'AI 기반 8페이지 진단 리포트를 이메일로 받습니다.',
+                desc: 'AI 기반 8페이지 진단 리포트를\n이메일로 받습니다.',
               },
             ].map((item) => (
               <div key={item.step} className="text-center">
@@ -78,7 +77,7 @@ export default async function LandingPage() {
                   {item.step}
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-1">{item.title}</h3>
-                <p className="text-sm text-gray-500">{item.desc}</p>
+                <p className="text-sm text-gray-500 whitespace-pre-line">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -110,23 +109,6 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="bg-gray-900 py-16 text-center">
-        <div className="max-w-3xl mx-auto px-6">
-          <h2 className="text-2xl font-bold text-white mb-4">
-            지금 시작하세요
-          </h2>
-          <p className="text-gray-400 mb-8">
-            AI 시대, 우리 기업의 현재 위치와 나아갈 방향을 확인하세요.
-          </p>
-          <Link
-            href="/pay"
-            className="inline-block px-8 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
-          >
-            사전 진단 시작하기 — 440,000원
-          </Link>
-        </div>
-      </section>
 
       {/* 푸터 */}
       <footer className="bg-gray-100 border-t border-gray-200 py-8">
