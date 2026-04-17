@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createPayment } from '@/lib/apphub-payments';
+import { createPayment } from '@/lib/apphub/apphub-payments';
 
 /**
  * 결제 주문 생성 API

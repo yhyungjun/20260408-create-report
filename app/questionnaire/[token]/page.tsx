@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { SURVEY_QUESTIONS, QUESTION_PAGES } from '@/lib/question-guide';
+import { SURVEY_QUESTIONS, QUESTION_PAGES } from '@/lib/questionnaire/question-guide';
 import QuestionRenderer from '@/components/questionnaire/QuestionRenderer';
 import ProgressBar from '@/components/questionnaire/ProgressBar';
 

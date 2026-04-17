@@ -6,8 +6,8 @@ import {
 import {
   getPaymentByOrderId,
   confirmPaymentRecord,
-} from '@/lib/apphub-payments';
-import { createPipeline } from '@/lib/apphub-pipelines';
+} from '@/lib/apphub/apphub-payments';
+import { createPipeline } from '@/lib/apphub/apphub-pipelines';
 import { sendPaymentConfirmEmail } from '@/lib/email';
 import { notifyNewPayment } from '@/lib/slack';
 

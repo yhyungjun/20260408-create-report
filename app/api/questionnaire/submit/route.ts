@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getPipelineByToken, updatePipelineStatus } from '@/lib/apphub-pipelines';
-import { getQuestionnaireByToken, submitQuestionnaire } from '@/lib/apphub-questionnaires';
+import { getPipelineByToken, updatePipelineStatus } from '@/lib/apphub/apphub-pipelines';
+import { getQuestionnaireByToken, submitQuestionnaire } from '@/lib/apphub/apphub-questionnaires';
 import { sendQuestionnaireCompleteEmail } from '@/lib/email';
 import { notifyQuestionnaireComplete } from '@/lib/slack';
 

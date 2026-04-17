@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
-import { getPipelineByToken } from '@/lib/apphub-pipelines';
+import { getPipelineByToken } from '@/lib/apphub/apphub-pipelines';
 import {
   getQuestionnaireByToken,
   createQuestionnaire,
   updateQuestionnaireAnswers,
-} from '@/lib/apphub-questionnaires';
+} from '@/lib/apphub/apphub-questionnaires';
 
 /** 설문 자동 저장 (디바운스) */
 export async function POST(req: Request) {

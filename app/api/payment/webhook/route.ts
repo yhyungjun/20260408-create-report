@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getPaymentByOrderId, updatePaymentStatus } from '@/lib/apphub-payments';
+import { getPaymentByOrderId, updatePaymentStatus } from '@/lib/apphub/apphub-payments';
 
 /**
  * 토스페이먼츠 웹훅 수신
