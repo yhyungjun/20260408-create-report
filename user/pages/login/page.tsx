@@ -1,3 +1,5 @@
+import Image from 'next/image';
+import Link from 'next/link';
 import { signInWithGoogle } from "@/lib/auth-actions";
 
 export default async function LoginPage({
@@ -50,9 +52,9 @@ export default async function LoginPage({
           </button>
         </form>
 
-        <p className="text-xs text-gray-400 mt-4">
-          조코딩 AX 파트너스
-        </p>
+        <Link href="/" className="mt-4 inline-block">
+          <Image src="/images/logo.png" alt="조코딩 AX 파트너스" width={120} height={30} className="h-6 w-auto" />
+        </Link>
       </div>
     </div>
   );

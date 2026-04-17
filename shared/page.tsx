@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { auth } from '@/auth';
 import UserMenu from '@/components/UserMenu';
 
@@ -13,9 +14,16 @@ export default async function LandingPage() {
       {/* 헤더 */}
       <header className="border-b border-gray-100">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-lg font-bold text-gray-900">조코딩 AX 파트너스</span>
-          </div>
+          <Link href="/" className="flex items-center gap-2">
+            <Image
+              src="/images/logo.png"
+              alt="조코딩 AX 파트너스"
+              width={160}
+              height={40}
+              className="h-8 w-auto"
+              priority
+            />
+          </Link>
           <UserMenu user={user} />
         </div>
       </header>

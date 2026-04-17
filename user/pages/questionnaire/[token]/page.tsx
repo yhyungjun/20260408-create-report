@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { SURVEY_QUESTIONS, QUESTION_PAGES } from '@/lib/question-guide';
 import QuestionRenderer from '@/components/questionnaire/QuestionRenderer';
@@ -156,8 +158,10 @@ export default function QuestionnairePage() {
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-3xl mx-auto px-6 py-4">
-          <h1 className="text-lg font-bold text-gray-900">사전 기업 진단 설문</h1>
-          <p className="text-xs text-gray-400 mt-0.5">조코딩 AX 파트너스</p>
+          <Link href="/">
+            <Image src="/images/logo.png" alt="조코딩 AX 파트너스" width={160} height={40} className="h-8 w-auto" />
+          </Link>
+          <h1 className="text-lg font-bold text-gray-900 mt-2">사전 기업 진단 설문</h1>
         </div>
       </header>
 

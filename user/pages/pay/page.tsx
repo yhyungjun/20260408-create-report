@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
 import { loadTossPayments } from '@tosspayments/payment-sdk';
 
 const PRODUCT = {
@@ -88,9 +90,9 @@ export default function PayPage() {
       {/* 헤더 */}
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-4xl mx-auto px-6 py-4">
-          <h1 className="text-xl font-bold text-gray-900">
-            조코딩 AX 파트너스
-          </h1>
+          <Link href="/">
+            <Image src="/images/logo.png" alt="조코딩 AX 파트너스" width={160} height={40} className="h-8 w-auto" />
+          </Link>
           <p className="text-sm text-gray-500 mt-1">사전 기업 진단 컨설팅</p>
         </div>
       </header>
