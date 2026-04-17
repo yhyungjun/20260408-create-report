@@ -32,7 +32,7 @@ export default async function LandingPage() {
       {/* 히어로 */}
       <section className="max-w-3xl mx-auto px-6 pt-20 pb-16 text-center">
         <h1 className="text-4xl font-bold text-gray-900 leading-tight mb-4">
-          AI 기반<br />사전 기업 진단 컨설팅
+          사전 기업 진단 컨설팅
         </h1>
         <p className="text-lg text-gray-500 mb-8 max-w-xl mx-auto">
           AI가 기업의 디지털 전환 준비도를 진단하고,<br />
@@ -65,7 +65,7 @@ export default async function LandingPage() {
               {
                 step: '04',
                 title: '리포트 전달',
-                desc: 'AI 기반 8페이지 진단 리포트를\n이메일로 받습니다.',
+                desc: '컨설팅 후 완성된 8페이지\n기업 진단 리포트를\n이메일로 받습니다.',
               },
             ].map((item) => (
               <div key={item.step} className="text-center">
