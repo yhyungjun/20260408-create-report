@@ -71,7 +71,7 @@ export async function POST(req: Request) {
     // 6. 이메일 + Slack 알림 (실패해도 결제 응답은 정상 반환)
     try {
       await Promise.all([
-        sendPaymentConfirmEmail(payment.contact_email, payment.company_name, questionnaireToken),
+        sendPaymentConfirmEmail(payment.contact_email, payment.company_name),
         notifyNewPayment(payment.company_name, payment.amount, payment.contact_email),
       ]);
     } catch (notifyErr) {

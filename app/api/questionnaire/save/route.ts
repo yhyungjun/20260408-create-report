@@ -16,7 +16,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
     }
 
-    const { token, userEmail, answers } = await req.json();
+    const { token, answers } = await req.json();
 
     if (!token) {
       return NextResponse.json({ error: '토큰이 필요합니다.' }, { status: 400 });

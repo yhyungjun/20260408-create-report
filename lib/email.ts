@@ -10,7 +10,6 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://ax.jocodingax.ai';
 export async function sendPaymentConfirmEmail(
   to: string,
   companyName: string,
-  questionnaireToken: string,
 ) {
   const questionnaireUrl = `${BASE_URL}/questionnaire`;
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 
 function SuccessContent() {
@@ -73,12 +74,12 @@ function SuccessContent() {
       <p className="text-gray-500 mb-4">사전 진단 설문지 작성 안내를 이메일로 보내드렸습니다.</p>
 
       {orderInfo && (
-        <a
+        <Link
           href="/questionnaire"
           className="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors mb-6"
         >
           지금 바로 설문 작성하기
-        </a>
+        </Link>
       )}
 
       {orderInfo && (
