@@ -41,10 +41,10 @@ export default function QuestionsPage() {
                       <td className="px-4 py-2 font-mono text-xs text-gray-600">{q.id}</td>
                       <td className="px-4 py-2">
                         <span className="px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-600">
-                          {typeLabel[q.type] || q.type}
+                          {typeLabel[q.answerType] || q.answerType}
                         </span>
                       </td>
-                      <td className="px-4 py-2 text-gray-900">{q.label}</td>
+                      <td className="px-4 py-2 text-gray-900">{q.questionText}</td>
                       <td className="px-4 py-2 text-gray-500 text-xs">
                         {q.options ? `${q.options.length}개` : '-'}
                       </td>

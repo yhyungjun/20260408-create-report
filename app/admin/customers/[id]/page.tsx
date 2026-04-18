@@ -75,7 +75,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                   {pageQuestions.map((q) => (
                     <div key={q.id} className="border-b border-gray-100 pb-3 last:border-0">
                       <p className="text-sm text-gray-500 mb-1">
-                        <span className="font-medium text-gray-700">{q.id}</span> — {q.label}
+                        <span className="font-medium text-gray-700">{q.id}</span> — {q.questionText}
                       </p>
                       <p className="text-sm text-gray-900">
                         {answers[q.id] || <span className="text-gray-400 italic">미응답</span>}
