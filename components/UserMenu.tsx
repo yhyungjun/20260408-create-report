@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
 import SignOutButton from './SignOutButton';
 
 interface Props {
@@ -78,18 +79,18 @@ export default function UserMenu({ user }: Props) {
           </div>
           {user.role === 'admin' && (
             <>
-              <a
+              <Link
                 href="/questionnaire"
                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
               >
                 사전 질문
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/admin"
                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
               >
                 관리자 대시보드
-              </a>
+              </Link>
             </>
           )}
           <SignOutButton />
