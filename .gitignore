@@ -6,6 +6,9 @@ node_modules/
 .env.local
 .env.*.local
 
+# MCP (평문 API 키 포함 — 커밋 금지)
+.mcp.json
+
 # Next.js
 .next/
 out/
