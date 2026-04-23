@@ -4,6 +4,9 @@ import { NextResponse } from "next/server"
 export default auth((req) => {
   const { pathname } = req.nextUrl;
 
+  // [DEV ONLY — REMOVE BEFORE COMMIT] 로컬 개발 환경 인증 우회
+  if (process.env.NODE_ENV === "development") return NextResponse.next();
+
   // /login은 보호하지 않음
   if (pathname === "/login") return NextResponse.next();
 

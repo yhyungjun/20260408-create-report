@@ -1,7 +1,42 @@
 import Link from 'next/link';
+import { ExternalLink } from 'lucide-react';
 import { listPipelines } from '@/lib/apphub/apphub-pipelines';
 import { listPayments } from '@/lib/apphub/apphub-payments';
 import { listQuestionnaires } from '@/lib/apphub/apphub-questionnaires';
+import PageHeader from '@/admin/components/PageHeader';
+import DataTable, { type Column } from '@/admin/components/DataTable';
+import StatusBadge, { type StatusVariant } from '@/admin/components/StatusBadge';
+
+interface CustomerRow {
+  pipelineId: string;
+  companyName: string;
+  contactName: string;
+  contactEmail: string;
+  paymentStatus: string;
+  questionnaireStatus: string;
+  submittedAt: string | null;
+  createdAt: string;
+}
+
+const PAYMENT_MAP: Record<string, { label: string; variant: StatusVariant }> = {
+  CONFIRMED: { label: '결제완료', variant: 'success' },
+  PENDING: { label: '대기', variant: 'pending' },
+  FAILED: { label: '실패', variant: 'danger' },
+};
+
+const QUESTIONNAIRE_MAP: Record<string, { label: string; variant: StatusVariant }> = {
+  SUBMITTED: { label: '제출완료', variant: 'success' },
+  IN_PROGRESS: { label: '작성중', variant: 'pending' },
+  NOT_STARTED: { label: '미시작', variant: 'neutral' },
+};
+
+function renderStatus(
+  status: string,
+  map: Record<string, { label: string; variant: StatusVariant }>,
+) {
+  const info = map[status] ?? { label: status, variant: 'neutral' as const };
+  return <StatusBadge variant={info.variant} label={info.label} />;
+}
 
 export default async function CustomersPage() {
   const [pipelines, payments, questionnaires] = await Promise.all([
@@ -10,94 +45,93 @@ export default async function CustomersPage() {
     listQuestionnaires(),
   ]);
 
-  // 파이프라인 기준으로 데이터 조인
-  const customers = pipelines.map((pipeline) => {
-    const payment = payments.find((p) => p.id === pipeline.payment_id);
-    const questionnaire = questionnaires.find(
-      (q) => q.pipeline_token === pipeline.questionnaire_token,
+  const rows: CustomerRow[] = pipelines
+    .map((p) => {
+      const payment = payments.find((x) => x.id === p.payment_id);
+      const questionnaire = questionnaires.find(
+        (q) => q.pipeline_token === p.questionnaire_token,
+      );
+      return {
+        pipelineId: p.id,
+        companyName: p.company_name,
+        contactName: p.contact_name ?? '-',
+        contactEmail: p.contact_email,
+        paymentStatus: payment?.status ?? 'UNKNOWN',
+        questionnaireStatus: questionnaire?.status ?? 'NOT_STARTED',
+        submittedAt: questionnaire?.submitted_at ?? null,
+        createdAt: p.created_at,
+      };
+    })
+    .sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
 
-    return {
-      pipelineId: pipeline.id,
-      companyName: pipeline.company_name,
-      contactName: pipeline.contact_name || '-',
-      contactEmail: pipeline.contact_email,
-      paymentStatus: payment?.status || 'UNKNOWN',
-      questionnaireStatus: questionnaire?.status || 'NOT_STARTED',
-      submittedAt: questionnaire?.submitted_at,
-      createdAt: pipeline.created_at,
-    };
-  });
-
-  // 최신순 정렬
-  customers.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
-  const statusLabel = (status: string) => {
-    const map: Record<string, { text: string; color: string }> = {
-      CONFIRMED: { text: '결제완료', color: 'bg-green-100 text-green-700' },
-      PENDING: { text: '대기중', color: 'bg-yellow-100 text-yellow-700' },
-      FAILED: { text: '실패', color: 'bg-red-100 text-red-700' },
-      SUBMITTED: { text: '제출완료', color: 'bg-blue-100 text-blue-700' },
-      IN_PROGRESS: { text: '작성중', color: 'bg-yellow-100 text-yellow-700' },
-      NOT_STARTED: { text: '미시작', color: 'bg-gray-100 text-gray-500' },
-    };
-    const info = map[status] || { text: status, color: 'bg-gray-100 text-gray-500' };
-    return (
-      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${info.color}`}>
-        {info.text}
-      </span>
-    );
-  };
+  const columns: Column<CustomerRow>[] = [
+    {
+      key: 'company',
+      header: '회사',
+      render: (r) => <span className="font-medium text-gray-900">{r.companyName}</span>,
+    },
+    {
+      key: 'contact',
+      header: '담당자',
+      render: (r) => <span className="text-gray-700">{r.contactName}</span>,
+    },
+    {
+      key: 'email',
+      header: '이메일',
+      render: (r) => <span className="text-gray-600 text-xs">{r.contactEmail}</span>,
+    },
+    {
+      key: 'payment',
+      header: '결제',
+      render: (r) => renderStatus(r.paymentStatus, PAYMENT_MAP),
+    },
+    {
+      key: 'form',
+      header: '설문',
+      render: (r) => renderStatus(r.questionnaireStatus, QUESTIONNAIRE_MAP),
+    },
+    {
+      key: 'submit',
+      header: '제출일',
+      render: (r) =>
+        r.submittedAt ? (
+          <span className="text-gray-500 text-xs">
+            {new Date(r.submittedAt).toLocaleDateString('ko-KR')}
+          </span>
+        ) : (
+          <span className="text-gray-400">-</span>
+        ),
+    },
+    {
+      key: 'action',
+      header: '',
+      align: 'right',
+      width: '100px',
+      render: (r) => (
+        <Link
+          href={`/admin/customers/${r.pipelineId}`}
+          className="inline-flex items-center gap-1 text-xs text-violet-600 hover:text-violet-700 font-medium"
+        >
+          상세 <ExternalLink className="w-3 h-3" />
+        </Link>
+      ),
+    },
+  ];
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-10">
-      <h1 className="text-2xl font-bold text-gray-900 mb-2">고객 응답 관리</h1>
-      <p className="text-gray-500 mb-6">총 {customers.length}건</p>
-
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b border-gray-200">
-            <tr>
-              <th className="text-left px-4 py-3 font-medium text-gray-700">회사명</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-700">담당자</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-700">이메일</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-700">결제</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-700">설문</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-700">제출일</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-700"></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {customers.map((c) => (
-              <tr key={c.pipelineId} className="hover:bg-gray-50">
-                <td className="px-4 py-3 font-medium text-gray-900">{c.companyName}</td>
-                <td className="px-4 py-3 text-gray-600">{c.contactName}</td>
-                <td className="px-4 py-3 text-gray-600">{c.contactEmail}</td>
-                <td className="px-4 py-3">{statusLabel(c.paymentStatus)}</td>
-                <td className="px-4 py-3">{statusLabel(c.questionnaireStatus)}</td>
-                <td className="px-4 py-3 text-gray-500">
-                  {c.submittedAt ? new Date(c.submittedAt).toLocaleDateString('ko-KR') : '-'}
-                </td>
-                <td className="px-4 py-3">
-                  <Link
-                    href={`/admin/customers/${c.pipelineId}`}
-                    className="text-blue-600 hover:underline text-sm"
-                  >
-                    상세
-                  </Link>
-                </td>
-              </tr>
-            ))}
-            {customers.length === 0 && (
-              <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-gray-400">
-                  아직 고객 데이터가 없습니다.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+    <div className="max-w-7xl mx-auto px-6 py-8">
+      <PageHeader
+        title="고객 응답 관리"
+        description={`총 ${rows.length}명의 고객 파이프라인을 관리합니다.`}
+      />
+      <DataTable
+        columns={columns}
+        rows={rows}
+        rowKey={(r) => r.pipelineId}
+        emptyMessage="아직 고객 데이터가 없습니다."
+      />
     </div>
   );
 }
